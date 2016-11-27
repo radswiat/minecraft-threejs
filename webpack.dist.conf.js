@@ -49,9 +49,8 @@ var webpackConfig = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
     new CopyWebpackPlugin([
-      {context: path.resolve(BASE_PATH, 'src/seemore'), from: '**/*', to: 'seemore'},
       {context: path.resolve(BASE_PATH, 'src/assets'), from: '**/*', to: 'assets'},
-      {context: path.resolve(BASE_PATH, 'src/'), from: 'seemore.html', to: ''}
+      {context: path.resolve(BASE_PATH, 'src/seemore.html'), from: 'seemore.html', to: '/'}
     ]),
     // new ExtendedDefinePlugin({
     //     WEBPACK_CONFIG: {
