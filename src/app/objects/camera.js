@@ -8,7 +8,7 @@ const defaults = {
     x: 0, y: 0, z: 0
   },
   position: {
-    x: 0, y: 15, z: 120
+    x: 600, y: 300, z: -200
   }
 }
 
@@ -35,7 +35,9 @@ export default class Plane {
     this.controls = new THREE.FirstPersonControls( this.camera );
     this.controls.movementSpeed = 120;
     this.controls.lookSpeed = 0.08;
-    this.controls.lon = -80;
+    this.controls.lon = -210;
+    this.controls.lat = -20;
+    this.controls.enabled = true;
   }
 
   setDefaults() {

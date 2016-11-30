@@ -27,7 +27,7 @@ export default class WorldGen {
     });
   }
 
-  is(x, y, z) {
+  exists(x, y, z) {
 
     let chunkSize = this.defaultOptions.chunkSize.width;
     // is out of boundaries ?
