@@ -16,7 +16,7 @@ const PUBLIC_PATH_RES = '../../../';
 var webpackConfig = {
   context: __dirname,
   entry: {
-    index: [path.resolve(BASE_PATH, 'src/lib/typedarray.js'), path.resolve(BASE_PATH, 'src/app/main.js'), 'webpack-hot-middleware/client', 'webpack/hot/dev-server']
+    index: [path.resolve(BASE_PATH, 'src/lib/typedarray.js'), path.resolve(BASE_PATH, 'src/app/main.js')]
   },
   output: {
     filename: 'main.js',
@@ -46,11 +46,10 @@ var webpackConfig = {
     ]
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin(),
     new CopyWebpackPlugin([
+      {context: path.resolve(BASE_PATH, 'src/seemore'), from: '**/*', to: 'seemore'},
       {context: path.resolve(BASE_PATH, 'src/assets'), from: '**/*', to: 'assets'},
-      {context: path.resolve(BASE_PATH, 'src/seemore.html'), from: 'seemore.html', to: '/'}
+      {context: path.resolve(BASE_PATH, 'src/'), from: 'seemore.html', to: ''}
     ]),
     // new ExtendedDefinePlugin({
     //     WEBPACK_CONFIG: {
@@ -65,47 +64,10 @@ var webpackConfig = {
   ]
 };
 
-
-/**
- * Webpack dev server
- */
-class DevWebpackDevServer {
-
-  webpackConfig = null;
-  express = null;
-
-  constructor(config) {
-    this.webpackConfig = config;
-    this.express = require('express');
-    this.compiler = webpack(this.webpackConfig);
-    this.app = this.express();
-    this.setMiddleware();
-    this.createServer();
-  }
-
-  setMiddleware() {
-    // midleware to simulate server long responses
-    this.app.use(function (req, res, next) {
-      if (/(\.json)$/.test(req.url)) {
-        setTimeout(next, 2000);
-        return;
-      }
-      next();
-    });
-    this.app.use(webpackDevMiddleware(this.compiler, {
-      noInfo: false, publicPath: this.webpackConfig.output.publicPath, hot: true, stats: {colors: true}
-    }));
-    this.app.use(webpackHotMiddleware(this.compiler));
-  }
-
-  createServer() {
-    this.app.get("/", function (req, res) {
-      res.sendFile(__dirname + '/index.html');
-    });
-    this.app.listen(3000);
-  }
-
-}
-
-
-new DevWebpackDevServer(webpackConfig);
+let compiler = webpack(webpackConfig);
+compiler.run((err, stats) => {
+  console.log('[webpack:build]', stats.toString({
+    chunks: false, // Makes the build much quieter
+    colors: true
+  }));
+});

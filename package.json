@@ -38,7 +38,8 @@
     "webpack-inject-loader": "^1.5.0"
   },
   "scripts": {
-    "start": "babel-node webpack.conf.js"
+    "start": "babel-node webpack.conf.js",
+    "build": "babel-node webpack.dist.conf.js"
   },
   "author": "",
   "license": "ISC"
