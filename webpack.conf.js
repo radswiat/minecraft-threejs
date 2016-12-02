@@ -29,6 +29,11 @@ var webpackConfig = {
   },
 
   module: {
+    noParse: [
+      // Suppress warnings and errors logged by benchmark.js when bundled using webpack.
+      // https://github.com/bestiejs/benchmark.js/issues/106
+      path.resolve(__dirname, './node_modules/benchmark/benchmark.js')
+    ],
     loaders: [
       {
         test: /\.js$/,

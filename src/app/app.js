@@ -12,6 +12,7 @@ import '../lib/FirstPersonControls';
 import $ from "jquery";
 import Chunk from './func/chunk';
 import Camera from './objects/camera';
+import Perf from './utils/perf';
 
 // var gui = new dat.GUI();
 var gui = null;
@@ -26,6 +27,7 @@ export default class App {
   def = {};
 
   constructor() {
+    Perf.get('PERF_start_end');
     this.scene = new Scene();
     this.clock = new Clock();
     // this.scene.fog = new THREE.Fog(0xffffff, 30, 200);
@@ -63,7 +65,7 @@ export default class App {
   }
 
   genChunks() {
-    let chunk = new Chunk('af25');
+    let chunk = new Chunk(1);
     let cubeSize = 20;
 
     var matrix = new Matrix4();
@@ -94,24 +96,31 @@ export default class App {
     var nzTmpGeometry = new Geometry().fromBufferGeometry( nzGeometry );
     var nyTmpGeometry = new Geometry().fromBufferGeometry( nyGeometry );
 
-    chunk.get((x, y, z) => {
+    // lets wait for worker
+    chunk.ready(() => {
 
-      matrix.makeTranslation(x * cubeSize, y * cubeSize, z * cubeSize);
+      // generate chunk
+      chunk.generateChunk((x, y, z, surrounding) => {
 
-      // Check what cube geometry should be drawn
-      if( !chunk.exists(x + 1, y, z) ) { tmpGeometry.merge( pxTmpGeometry, matrix ); }
-      if( !chunk.exists(x - 1, y, z) ) { tmpGeometry.merge( nxTmpGeometry, matrix ); }
-      if( !chunk.exists(x, y + 1, z) ) { tmpGeometry.merge( pyTmpGeometry, matrix ); }
-      if( !chunk.exists(x, y, z + 1) ) { tmpGeometry.merge( pzTmpGeometry, matrix ); }
-      if( !chunk.exists(x, y, z - 1) ) { tmpGeometry.merge( nzTmpGeometry, matrix ); }
-      if( !chunk.exists(x, y - 1, z) ) { tmpGeometry.merge( nyTmpGeometry, matrix ); }
+        matrix.makeTranslation(x * cubeSize, y * cubeSize, z * cubeSize);
+
+        // Check what cube geometry should be drawn
+        if( !surrounding.px ) { tmpGeometry.merge( pxTmpGeometry, matrix ); }
+        if( !surrounding.nx ) { tmpGeometry.merge( nxTmpGeometry, matrix ); }
+        if( !surrounding.py ) { tmpGeometry.merge( pyTmpGeometry, matrix ); }
+        if( !surrounding.pz ) { tmpGeometry.merge( pzTmpGeometry, matrix ); }
+        if( !surrounding.nz ) { tmpGeometry.merge( nzTmpGeometry, matrix ); }
+        if( !surrounding.ny ) { tmpGeometry.merge( nyTmpGeometry, matrix ); }
+
+      });
+
+      var geometry = new BufferGeometry().fromGeometry( tmpGeometry );
+      geometry.computeBoundingSphere();
+      var texture = new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" );
+      var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) );
+      this.scene.add( mesh );
+      Perf.get('PERF_start_end').end();
     });
-
-    var geometry = new BufferGeometry().fromGeometry( tmpGeometry );
-    geometry.computeBoundingSphere();
-    var texture = new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" );
-    var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) );
-    this.scene.add( mesh );
   }
 
   render() {

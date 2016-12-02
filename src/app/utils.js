@@ -12,4 +12,11 @@ export default class Utils {
     return deg - (Math.floor((deg / 360)) * 360);
   }
 
+  static defined(object) {
+    if(typeof object !== 'undefined') {
+      return true;
+    }
+    return false;
+  }
+
 }

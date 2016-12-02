@@ -2503,16 +2503,7 @@
 
 	var _camera2 = _interopRequireDefault(_camera);
 
-	var _cube = __webpack_require__(126);
-
-	var _cube2 = _interopRequireDefault(_cube);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SimplexNoise = __webpack_require__(112);
-
-	// import object
-
 
 	// var gui = new dat.GUI();
 	var gui = null;
@@ -2529,89 +2520,8 @@
 	    this.createRenderer();
 	    this.createAxes();
 	    this.createLights();
-
-	    var cubeSpacing = 0.00;
-
-	    var chunk = new _chunk2.default('af25', {});
-
-	    ///////////////////////////////////////////////////////////////
-	    ///////////////////////////////////////////////////////////////
-	    ///////////////////////////////////////////////////////////////
-	    ///////////////////////////    START NEW WAY //////////////////
-	    var cubeSize = 20;
-
-	    var matrix = new _three.Matrix4();
-	    var pxGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	    pxGeometry.rotateY(Math.PI / 2);
-	    pxGeometry.translate(cubeSize / 2, 0, 0);
-	    var nxGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	    nxGeometry.rotateY(-Math.PI / 2);
-	    nxGeometry.translate(-cubeSize / 2, 0, 0);
-	    // top geometry
-	    var pyGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	    pyGeometry.rotateX(-Math.PI / 2);
-	    pyGeometry.translate(0, cubeSize / 2, 0);
-
-	    // right ???
-	    var pzGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	    pzGeometry.translate(0, 0, cubeSize / 2);
-	    var nzGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	    nzGeometry.rotateY(Math.PI);
-	    nzGeometry.translate(0, 0, -cubeSize / 2);
-
-	    // BufferGeometry cannot be merged yet.
-	    var tmpGeometry = new _three.Geometry();
-	    // right
-	    var pxTmpGeometry = new _three.Geometry().fromBufferGeometry(pxGeometry);
-	    // left
-	    var nxTmpGeometry = new _three.Geometry().fromBufferGeometry(nxGeometry);
-	    // top
-	    var pyTmpGeometry = new _three.Geometry().fromBufferGeometry(pyGeometry);
-	    // front
-	    var pzTmpGeometry = new _three.Geometry().fromBufferGeometry(pzGeometry);
-	    // back
-	    var nzTmpGeometry = new _three.Geometry().fromBufferGeometry(nzGeometry);
-
-	    chunk.get(function (x, y, z) {
-
-	      matrix.makeTranslation(x * cubeSize, y * cubeSize, z * cubeSize);
-
-	      // Check what cube geometry should be drawn
-	      if (!chunk.is(x, y + 1, z)) {
-	        tmpGeometry.merge(pyTmpGeometry, matrix);
-	      }
-	      if (!chunk.is(x + 1, y, z)) {
-	        tmpGeometry.merge(pxTmpGeometry, matrix);
-	      }
-	      if (!chunk.is(x - 1, y, z)) {
-	        tmpGeometry.merge(nxTmpGeometry, matrix);
-	      }
-
-	      // tmpGeometry.merge( pxTmpGeometry, matrix );
-	      // tmpGeometry.merge( nxTmpGeometry, matrix );
-	      tmpGeometry.merge(pzTmpGeometry, matrix);
-	      tmpGeometry.merge(nzTmpGeometry, matrix);
-
-	      // let cube = new Cube(this, gui, {
-	      //   size: cubeSize
-	      // });
-	      // cube.position.set(x * (cubeSize + cubeSpacing), z * (cubeSize + cubeSpacing), y * (cubeSize + cubeSpacing));
-	      // this.scene.add(cube);
-	    });
-
-	    var geometry = new _three.BufferGeometry().fromGeometry(tmpGeometry);
-	    geometry.computeBoundingSphere();
-	    var texture = new _three.TextureLoader().load("../assets/textures/blocks/hardened_clay_stained_green.png");
-	    var mesh = new _three.Mesh(geometry, new _three.MeshLambertMaterial({ map: texture }));
-	    this.scene.add(mesh);
-
-	    ///////////////////////////    END NEW WAY //////////////////
-	    ///////////////////////////////////////////////////////////////
-	    ///////////////////////////////////////////////////////////////
-	    ///////////////////////////////////////////////////////////////
-
+	    this.genChunks();
 	    this.camera = new _camera2.default(this, gui);
-	    this.addControls();
 	    requestAnimationFrame(this.update.bind(this));
 	  }
 
@@ -2644,12 +2554,69 @@
 	      this.scene.add(directionalLight);
 	    }
 	  }, {
-	    key: 'addControls',
-	    value: function addControls() {
-	      // this.controls = new THREE.FirstPersonControls( this.camera );
-	      // this.controls.movementSpeed = 1000;
-	      // this.controls.lookSpeed = 0.125;
-	      // this.controls.lookVertical = true;
+	    key: 'genChunks',
+	    value: function genChunks() {
+	      var chunk = new _chunk2.default('af25');
+	      var cubeSize = 20;
+
+	      var matrix = new _three.Matrix4();
+	      var pxGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	      pxGeometry.rotateY(Math.PI / 2);
+	      pxGeometry.translate(cubeSize / 2, 0, 0);
+	      var nxGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	      nxGeometry.rotateY(-Math.PI / 2);
+	      nxGeometry.translate(-cubeSize / 2, 0, 0);
+	      var pyGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	      pyGeometry.rotateX(-Math.PI / 2);
+	      pyGeometry.translate(0, cubeSize / 2, 0);
+	      var pzGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	      pzGeometry.translate(0, 0, cubeSize / 2);
+	      var nzGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	      nzGeometry.rotateY(Math.PI);
+	      nzGeometry.translate(0, 0, -cubeSize / 2);
+	      var nyGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	      nyGeometry.rotateX(Math.PI / 2);
+	      nyGeometry.translate(0, -cubeSize / 2, 0);
+
+	      // BufferGeometry
+	      var tmpGeometry = new _three.Geometry();
+	      var pxTmpGeometry = new _three.Geometry().fromBufferGeometry(pxGeometry);
+	      var nxTmpGeometry = new _three.Geometry().fromBufferGeometry(nxGeometry);
+	      var pyTmpGeometry = new _three.Geometry().fromBufferGeometry(pyGeometry);
+	      var pzTmpGeometry = new _three.Geometry().fromBufferGeometry(pzGeometry);
+	      var nzTmpGeometry = new _three.Geometry().fromBufferGeometry(nzGeometry);
+	      var nyTmpGeometry = new _three.Geometry().fromBufferGeometry(nyGeometry);
+
+	      chunk.get(function (x, y, z) {
+
+	        matrix.makeTranslation(x * cubeSize, y * cubeSize, z * cubeSize);
+
+	        // Check what cube geometry should be drawn
+	        if (!chunk.exists(x + 1, y, z)) {
+	          tmpGeometry.merge(pxTmpGeometry, matrix);
+	        }
+	        if (!chunk.exists(x - 1, y, z)) {
+	          tmpGeometry.merge(nxTmpGeometry, matrix);
+	        }
+	        if (!chunk.exists(x, y + 1, z)) {
+	          tmpGeometry.merge(pyTmpGeometry, matrix);
+	        }
+	        if (!chunk.exists(x, y, z + 1)) {
+	          tmpGeometry.merge(pzTmpGeometry, matrix);
+	        }
+	        if (!chunk.exists(x, y, z - 1)) {
+	          tmpGeometry.merge(nzTmpGeometry, matrix);
+	        }
+	        if (!chunk.exists(x, y - 1, z)) {
+	          tmpGeometry.merge(nyTmpGeometry, matrix);
+	        }
+	      });
+
+	      var geometry = new _three.BufferGeometry().fromGeometry(tmpGeometry);
+	      geometry.computeBoundingSphere();
+	      var texture = new _three.TextureLoader().load("../assets/textures/blocks/hardened_clay_stained_green.png");
+	      var mesh = new _three.Mesh(geometry, new _three.MeshLambertMaterial({ map: texture }));
+	      this.scene.add(mesh);
 	    }
 	  }, {
 	    key: 'render',
@@ -2667,7 +2634,6 @@
 	      this.updateStack.forEach(function (cb) {
 	        cb();
 	      });
-	      // this.controls.update( this.clock.getDelta() );
 	      this.render();
 	      requestAnimationFrame(this.update.bind(this));
 	    }
@@ -20952,8 +20918,8 @@
 	  }
 
 	  (0, _createClass3.default)(WorldGen, [{
-	    key: 'is',
-	    value: function is(x, y, z) {
+	    key: 'exists',
+	    value: function exists(x, y, z) {
 
 	      var chunkSize = this.defaultOptions.chunkSize.width;
 	      // is out of boundaries ?
@@ -45110,7 +45076,7 @@
 	    x: 0, y: 0, z: 0
 	  },
 	  position: {
-	    x: 0, y: 15, z: 120
+	    x: 600, y: 300, z: -200
 	  }
 	};
 
@@ -45141,7 +45107,9 @@
 	      this.controls = new THREE.FirstPersonControls(this.camera);
 	      this.controls.movementSpeed = 120;
 	      this.controls.lookSpeed = 0.08;
-	      this.controls.lon = -80;
+	      this.controls.lon = -210;
+	      this.controls.lat = -20;
+	      this.controls.enabled = true;
 	    }
 	  }, {
 	    key: 'setDefaults',
@@ -45785,60 +45753,6 @@
 	}; /**
 	    * @author mrdoob / http://mrdoob.com/
 	    */
-
-/***/ },
-/* 126 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = undefined;
-
-	var _classCallCheck2 = __webpack_require__(75);
-
-	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-	var _createClass2 = __webpack_require__(76);
-
-	var _createClass3 = _interopRequireDefault(_createClass2);
-
-	var _class, _temp;
-
-	var _three = __webpack_require__(77);
-
-	var _three2 = _interopRequireDefault(_three);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Sphere = (_temp = _class = function () {
-	  function Sphere(app, gui, params) {
-	    (0, _classCallCheck3.default)(this, Sphere);
-
-	    this.app = app;
-	    this.gui = gui;
-	    this.params = params;
-	    this.create();
-	    return this.cube;
-	  }
-
-	  (0, _createClass3.default)(Sphere, [{
-	    key: "create",
-	    value: function create() {
-	      // loading texture
-	      var texture = _three2.default.ImageUtils.loadTexture("../assets/textures/blocks/hardened_clay_stained_green.png");
-	      var cubeGeometry = new _three2.default.BoxGeometry(this.params.size, this.params.size, this.params.size);
-	      var cubeMaterial = new _three2.default.MeshLambertMaterial();
-	      cubeMaterial.map = texture;
-	      this.cube = new _three2.default.Mesh(cubeGeometry, cubeMaterial);
-	      this.cube.castShadow = true;
-	    }
-	  }]);
-	  return Sphere;
-	}(), _class.isGui = false, _temp);
-	exports.default = Sphere;
 
 /***/ }
 /******/ ]);
