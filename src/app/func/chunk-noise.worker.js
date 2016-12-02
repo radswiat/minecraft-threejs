@@ -4,6 +4,7 @@ self.addEventListener('message', function(e) {
   let chunkSize = e.data.chunkSize;
   let noise = new Noise(seed);
   let chunkNoise = {};
+  let chunkLocation = e.data.chunkLocation;
   let mod = e.data.mod;
 
   /**
@@ -29,7 +30,11 @@ self.addEventListener('message', function(e) {
     if( typeof chunkNoise[`${x}_${y}_${z}`] !== 'undefined') {
       return chunkNoise[`${x}_${y}_${z}`].noiseValue;
     }
-    return  noise.perlin3(x / mod, y / mod, z / mod);
+    let noiseValue = noise.perlin3(x / mod, y / mod, z / mod);
+    // return noiseValue;
+    // noiseValue = ( noiseValue / 2 ) / y;
+    noiseValue += ( 10 - y ) / 10; // ( 5 / z ) / 10
+    return noiseValue;
   };
 
   /**
@@ -52,21 +57,27 @@ self.addEventListener('message', function(e) {
   for (let x = chunkSize / 2 * -1; x <= chunkSize / 2; x++) {
     for (let y = chunkSize / 2 * -1; y <= chunkSize / 2; y++) {
       for (let z = chunkSize / 2 * -1; z <= chunkSize / 2; z++) {
+
+        // translate by the chunkId
+        let tx = ( chunkLocation.y * chunkSize ) + x;
+        let ty = y;
+        let tz = ( chunkLocation.x * chunkSize ) + z;
+
         // main noise value
-        var noiseValue = getNoiseFor(x, y, z);
+        var noiseValue = getNoiseFor(tx, ty, tz);
         if( isCubeFilled(noiseValue) ) {
           // get surrounding area noise
           var surroundingNoiseValues = {
-            px : getSurrounding(x + 1, y, z),
-            nx : getSurrounding(x - 1, y, z),
-            py : getSurrounding(x, y + 1, z),
-            pz : getSurrounding(x, y, z + 1),
-            nz : getSurrounding(x, y, z - 1),
-            ny : getSurrounding(x, y - 1, z)
+            px : getSurrounding(tx + 1, ty, tz),
+            nx : getSurrounding(tx - 1, ty, tz),
+            py : getSurrounding(tx, ty + 1, tz),
+            pz : getSurrounding(tx, ty, tz + 1),
+            nz : getSurrounding(tx, ty, tz - 1),
+            ny : getSurrounding(tx, ty - 1, tz)
           };
-          chunkNoise[`${x}_${y}_${z}`] = {
+          chunkNoise[`${tx}_${ty}_${tz}`] = {
             location: {
-              x, y, z
+              x: tx, y: ty, z: tz
             },
             surrounding: surroundingNoiseValues,
             noiseValue: noiseValue

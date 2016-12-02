@@ -118,7 +118,6 @@ export default class ChunkNoiseViewer {
    */
   end() {
     Promise.all(this.threads).then(() => {
-      console.error('------- end ! -------');
       // adjust canvas size
       let size =  Math.round(Math.pow(this.points.length, 1/3)) * this.recSize;
       this.$canvas[0].width = size;
@@ -128,10 +127,8 @@ export default class ChunkNoiseViewer {
   }
 
   draw() {
-    console.warn('draw mode: ' + this.mode);
     this.points.forEach((point) => {
       this.rect(point[this.modeTypes[this.mode][0]], point[this.modeTypes[this.mode][1]], point.noise)
-      // this.rect(point.x, point.y, point.noise);
     })
   }
 

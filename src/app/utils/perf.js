@@ -14,8 +14,6 @@ class _Perf {
 
   end() {
     this.timeEnd = new Date().getTime();
-    console.warn(this.name);
-
     console.log(`${(this.timeEnd - this.timeStart) / 1000}s`);
   }
 }

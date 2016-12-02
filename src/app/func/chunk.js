@@ -1,19 +1,20 @@
 import _ from 'lodash';
 import ChunkNoiseViewer from '../objects/chunk-noise-viewer';
 import {Noise} from 'noisejs';
+import config from '../config';
 import Utils from '../utils';
 var ChunkNoiseWorker = require("worker-loader!./chunk-noise.worker.js");
+var chankId = 0;
 
-export default class WorldGen {
+export default class Chunk {
 
   cb = null;
   cubeNoiseCache = {};
 
-  defaultOptions = {
-    chunkSize: {width: 26, height: 26}
-  };
 
   constructor(seed, options) {
+    this.id = chankId;
+    chankId++;
     this.seed = seed;
     this.cfg = _.merge(this.defaultOptions, options);
     this.helperNoise1 = new ChunkNoiseViewer({
@@ -24,46 +25,48 @@ export default class WorldGen {
       right: 0,
       top: 0
     });
-    this.readyPromise = new Promise((resolve) => {
-      this.generateNoise(resolve);
+  }
+
+  generateNoise(location) {
+    return new Promise((resolve) => {
+      var worker = new ChunkNoiseWorker();
+      worker.postMessage({
+        seed: this.seed,
+        chunkLocation: location,
+        chunkSize: config.chunkSize,
+        mod: 30
+      });
+      worker.onmessage = (e) => {
+        this.cubeNoiseCache = e.data;
+        resolve();
+      };
     })
-  }
-
-  generateNoise(resolve) {
-    var worker = new ChunkNoiseWorker();
-    worker.postMessage({
-      seed: this.seed,
-      chunkSize: this.defaultOptions.chunkSize.width,
-      mod: 30
-    });
-    worker.onmessage = (e) => {
-      this.cubeNoiseCache = e.data;
-      resolve();
-    };
-  }
-
-  ready(cb) {
-    this.readyPromise.then(cb);
   }
 
   /**
    * Generate chunk,
    * @param cb
    */
-  generateChunk(cb) {
-    this.cb = cb;
-    for (let p in this.cubeNoiseCache) {
-      // this.helperNoise2.add(x, y, z, noiseValue);
-      cb(
-        this.cubeNoiseCache[p].location.x,
-        this.cubeNoiseCache[p].location.y,
-        this.cubeNoiseCache[p].location.z,
-        this.cubeNoiseCache[p].surrounding,
-      );
-    }
-    this.helperNoise1.end();
-    this.helperNoise2.end();
+  generateChunk(location, cb) {
+    return new Promise((resolve) => {
+      this.generateNoise(location).then(() => {
+        this.cb = cb;
+        for (let p in this.cubeNoiseCache) {
+          cb(
+            this.cubeNoiseCache[p].location.x,
+            this.cubeNoiseCache[p].location.y,
+            this.cubeNoiseCache[p].location.z,
+            this.cubeNoiseCache[p].surrounding,
+          );
+        }
+        this.helperNoise1.end();
+        this.helperNoise2.end();
+        resolve();
+      });
+    });
   }
+
+
 
 }
 
