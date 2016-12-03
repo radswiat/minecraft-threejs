@@ -14,7 +14,7 @@ class _Perf {
 
   end() {
     this.timeEnd = new Date().getTime();
-    console.log(`${(this.timeEnd - this.timeStart) / 1000}s`);
+    console.log(`%c ${this.name} in ${(this.timeEnd - this.timeStart) / 1000}s`, 'color: blue; font-size: 12px; background: #95D7FF; padding: 1px 5px;');
   }
 }
 
@@ -26,7 +26,7 @@ export default class Perf {
 
   static get(name) {
     if( typeof instances[name] === 'undefined') {
-      instances[name] = new _Perf();
+      instances[name] = new _Perf(name);
     }
 
     return instances[name];

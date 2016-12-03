@@ -27,7 +27,7 @@ export default class App {
   def = {};
 
   constructor() {
-    Perf.get('PERF_start_end');
+    Perf.get('Engine starts');
     this.scene = new Scene();
     this.clock = new Clock();
     // this.scene.fog = new THREE.Fog(0xffffff, 30, 200);
@@ -36,6 +36,7 @@ export default class App {
     this.createLights();
     new World(this);
     this.camera = new Camera(this, gui);
+    Perf.get('Engine starts').end();
     requestAnimationFrame(this.update.bind(this));
   }
 

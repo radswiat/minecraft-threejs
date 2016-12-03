@@ -2495,17 +2495,17 @@
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	var _chunk = __webpack_require__(110);
-
-	var _chunk2 = _interopRequireDefault(_chunk);
-
-	var _camera = __webpack_require__(139);
+	var _camera = __webpack_require__(110);
 
 	var _camera2 = _interopRequireDefault(_camera);
 
-	var _perf = __webpack_require__(142);
+	var _perf = __webpack_require__(113);
 
 	var _perf2 = _interopRequireDefault(_perf);
+
+	var _world = __webpack_require__(114);
+
+	var _world2 = _interopRequireDefault(_world);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2525,7 +2525,7 @@
 	    this.createRenderer();
 	    this.createAxes();
 	    this.createLights();
-	    this.genChunks();
+	    new _world2.default(this);
 	    this.camera = new _camera2.default(this, gui);
 	    requestAnimationFrame(this.update.bind(this));
 	  }
@@ -2557,79 +2557,6 @@
 	      var directionalLight = new _three.DirectionalLight(0xffffff, 1.4);
 	      directionalLight.position.set(-50, 50, 50);
 	      this.scene.add(directionalLight);
-	    }
-	  }, {
-	    key: 'genChunks',
-	    value: function genChunks() {
-	      var _this = this;
-
-	      var chunk = new _chunk2.default(1);
-	      var cubeSize = 20;
-
-	      var matrix = new _three.Matrix4();
-	      var pxGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	      pxGeometry.rotateY(Math.PI / 2);
-	      pxGeometry.translate(cubeSize / 2, 0, 0);
-	      var nxGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	      nxGeometry.rotateY(-Math.PI / 2);
-	      nxGeometry.translate(-cubeSize / 2, 0, 0);
-	      var pyGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	      pyGeometry.rotateX(-Math.PI / 2);
-	      pyGeometry.translate(0, cubeSize / 2, 0);
-	      var pzGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	      pzGeometry.translate(0, 0, cubeSize / 2);
-	      var nzGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	      nzGeometry.rotateY(Math.PI);
-	      nzGeometry.translate(0, 0, -cubeSize / 2);
-	      var nyGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
-	      nyGeometry.rotateX(Math.PI / 2);
-	      nyGeometry.translate(0, -cubeSize / 2, 0);
-
-	      // BufferGeometry
-	      var tmpGeometry = new _three.Geometry();
-	      var pxTmpGeometry = new _three.Geometry().fromBufferGeometry(pxGeometry);
-	      var nxTmpGeometry = new _three.Geometry().fromBufferGeometry(nxGeometry);
-	      var pyTmpGeometry = new _three.Geometry().fromBufferGeometry(pyGeometry);
-	      var pzTmpGeometry = new _three.Geometry().fromBufferGeometry(pzGeometry);
-	      var nzTmpGeometry = new _three.Geometry().fromBufferGeometry(nzGeometry);
-	      var nyTmpGeometry = new _three.Geometry().fromBufferGeometry(nyGeometry);
-
-	      // lets wait for worker
-	      chunk.ready(function () {
-
-	        // generate chunk
-	        chunk.generateChunk(function (x, y, z, surrounding) {
-
-	          matrix.makeTranslation(x * cubeSize, y * cubeSize, z * cubeSize);
-
-	          // Check what cube geometry should be drawn
-	          if (!surrounding.px) {
-	            tmpGeometry.merge(pxTmpGeometry, matrix);
-	          }
-	          if (!surrounding.nx) {
-	            tmpGeometry.merge(nxTmpGeometry, matrix);
-	          }
-	          if (!surrounding.py) {
-	            tmpGeometry.merge(pyTmpGeometry, matrix);
-	          }
-	          if (!surrounding.pz) {
-	            tmpGeometry.merge(pzTmpGeometry, matrix);
-	          }
-	          if (!surrounding.nz) {
-	            tmpGeometry.merge(nzTmpGeometry, matrix);
-	          }
-	          if (!surrounding.ny) {
-	            tmpGeometry.merge(nyTmpGeometry, matrix);
-	          }
-	        });
-
-	        var geometry = new _three.BufferGeometry().fromGeometry(tmpGeometry);
-	        geometry.computeBoundingSphere();
-	        var texture = new _three.TextureLoader().load("../assets/textures/blocks/hardened_clay_stained_green.png");
-	        var mesh = new _three.Mesh(geometry, new _three.MeshLambertMaterial({ map: texture }));
-	        _this.scene.add(mesh);
-	        _perf2.default.get('PERF_start_end').end();
-	      });
 	    }
 	  }, {
 	    key: 'render',
@@ -20880,9 +20807,721 @@
 	});
 	exports.default = undefined;
 
-	var _promise = __webpack_require__(111);
+	var _classCallCheck2 = __webpack_require__(75);
 
-	var _promise2 = _interopRequireDefault(_promise);
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(76);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _three = __webpack_require__(77);
+
+	var THREE = _interopRequireWildcard(_three);
+
+	__webpack_require__(111);
+
+	__webpack_require__(112);
+
+	__webpack_require__(108);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var defaults = {
+	  rotation: {
+	    x: 0, y: 0, z: 0
+	  },
+	  position: {
+	    x: 600, y: 300, z: -200
+	  }
+	};
+
+	var Plane = function () {
+	  function Plane(app, gui, params) {
+	    (0, _classCallCheck3.default)(this, Plane);
+
+	    this.app = app;
+	    this.gui = gui;
+	    this.params = params;
+	    this.clock = new THREE.Clock();
+	    this.createCamera();
+	    this.setDefaults();
+	    this.createControls();
+	    this.update();
+	    return this.camera;
+	  }
+
+	  (0, _createClass3.default)(Plane, [{
+	    key: 'createCamera',
+	    value: function createCamera() {
+	      this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 6000);
+	      this.app.registerUpdate(this.update.bind(this));
+	    }
+	  }, {
+	    key: 'createControls',
+	    value: function createControls() {
+	      this.controls = new THREE.FirstPersonControls(this.camera);
+	      this.controls.movementSpeed = 120;
+	      this.controls.lookSpeed = 0.08;
+	      this.controls.lon = -210;
+	      this.controls.lat = -20;
+	      this.controls.enabled = true;
+	    }
+	  }, {
+	    key: 'setDefaults',
+	    value: function setDefaults() {
+	      this.camera.position.x = defaults.position.x;
+	      this.camera.position.y = defaults.position.y;
+	      this.camera.position.z = defaults.position.z;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      this.controls.update(this.clock.getDelta());
+	    }
+	  }]);
+	  return Plane;
+	}();
+
+	exports.default = Plane;
+
+/***/ },
+/* 111 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _create = __webpack_require__(91);
+
+	var _create2 = _interopRequireDefault(_create);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/**
+	 * @author Eberhard Graether / http://egraether.com/
+	 * @author Mark Lundin 	/ http://mark-lundin.com
+	 * @author Simone Manini / http://daron1337.github.io
+	 * @author Luca Antiga 	/ http://lantiga.github.io
+	 */
+	var THREE = __webpack_require__(77);
+
+	THREE.TrackballControls = function (object, domElement) {
+
+	    var _this = this;
+	    var STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2, TOUCH_ROTATE: 3, TOUCH_ZOOM_PAN: 4 };
+
+	    this.object = object;
+	    this.domElement = domElement !== undefined ? domElement : document;
+
+	    // API
+
+	    this.enabled = true;
+
+	    this.screen = { left: 0, top: 0, width: 0, height: 0 };
+
+	    this.rotateSpeed = 1.0;
+	    this.zoomSpeed = 1.2;
+	    this.panSpeed = 0.3;
+
+	    this.noRotate = false;
+	    this.noZoom = false;
+	    this.noPan = false;
+
+	    this.staticMoving = false;
+	    this.dynamicDampingFactor = 0.2;
+
+	    this.minDistance = 0;
+	    this.maxDistance = Infinity;
+
+	    this.keys = [65 /*A*/, 83 /*S*/, 68 /*D*/];
+
+	    // internals
+
+	    this.target = new THREE.Vector3();
+
+	    var EPS = 0.000001;
+
+	    var lastPosition = new THREE.Vector3();
+
+	    var _state = STATE.NONE,
+	        _prevState = STATE.NONE,
+	        _eye = new THREE.Vector3(),
+	        _movePrev = new THREE.Vector2(),
+	        _moveCurr = new THREE.Vector2(),
+	        _lastAxis = new THREE.Vector3(),
+	        _lastAngle = 0,
+	        _zoomStart = new THREE.Vector2(),
+	        _zoomEnd = new THREE.Vector2(),
+	        _touchZoomDistanceStart = 0,
+	        _touchZoomDistanceEnd = 0,
+	        _panStart = new THREE.Vector2(),
+	        _panEnd = new THREE.Vector2();
+
+	    // for reset
+
+	    this.target0 = this.target.clone();
+	    this.position0 = this.object.position.clone();
+	    this.up0 = this.object.up.clone();
+
+	    // events
+
+	    var changeEvent = { type: 'change' };
+	    var startEvent = { type: 'start' };
+	    var endEvent = { type: 'end' };
+
+	    // methods
+
+	    this.handleResize = function () {
+
+	        if (this.domElement === document) {
+
+	            this.screen.left = 0;
+	            this.screen.top = 0;
+	            this.screen.width = window.innerWidth;
+	            this.screen.height = window.innerHeight;
+	        } else {
+
+	            var box = this.domElement.getBoundingClientRect();
+	            // adjustments come from similar code in the jquery offset() function
+	            var d = this.domElement.ownerDocument.documentElement;
+	            this.screen.left = box.left + window.pageXOffset - d.clientLeft;
+	            this.screen.top = box.top + window.pageYOffset - d.clientTop;
+	            this.screen.width = box.width;
+	            this.screen.height = box.height;
+	        }
+	    };
+
+	    this.handleEvent = function (event) {
+
+	        if (typeof this[event.type] == 'function') {
+
+	            this[event.type](event);
+	        }
+	    };
+
+	    var getMouseOnScreen = function () {
+
+	        var vector = new THREE.Vector2();
+
+	        return function getMouseOnScreen(pageX, pageY) {
+
+	            vector.set((pageX - _this.screen.left) / _this.screen.width, (pageY - _this.screen.top) / _this.screen.height);
+
+	            return vector;
+	        };
+	    }();
+
+	    var getMouseOnCircle = function () {
+
+	        var vector = new THREE.Vector2();
+
+	        return function getMouseOnCircle(pageX, pageY) {
+
+	            vector.set((pageX - _this.screen.width * 0.5 - _this.screen.left) / (_this.screen.width * 0.5), (_this.screen.height + 2 * (_this.screen.top - pageY)) / _this.screen.width);
+
+	            return vector;
+	        };
+	    }();
+
+	    this.rotateCamera = function () {
+
+	        var axis = new THREE.Vector3(),
+	            quaternion = new THREE.Quaternion(),
+	            eyeDirection = new THREE.Vector3(),
+	            objectUpDirection = new THREE.Vector3(),
+	            objectSidewaysDirection = new THREE.Vector3(),
+	            moveDirection = new THREE.Vector3(),
+	            angle;
+
+	        return function rotateCamera() {
+
+	            moveDirection.set(_moveCurr.x - _movePrev.x, _moveCurr.y - _movePrev.y, 0);
+	            angle = moveDirection.length();
+
+	            if (angle) {
+
+	                _eye.copy(_this.object.position).sub(_this.target);
+
+	                eyeDirection.copy(_eye).normalize();
+	                objectUpDirection.copy(_this.object.up).normalize();
+	                objectSidewaysDirection.crossVectors(objectUpDirection, eyeDirection).normalize();
+
+	                objectUpDirection.setLength(_moveCurr.y - _movePrev.y);
+	                objectSidewaysDirection.setLength(_moveCurr.x - _movePrev.x);
+
+	                moveDirection.copy(objectUpDirection.add(objectSidewaysDirection));
+
+	                axis.crossVectors(moveDirection, _eye).normalize();
+
+	                angle *= _this.rotateSpeed;
+	                quaternion.setFromAxisAngle(axis, angle);
+
+	                _eye.applyQuaternion(quaternion);
+	                _this.object.up.applyQuaternion(quaternion);
+
+	                _lastAxis.copy(axis);
+	                _lastAngle = angle;
+	            } else if (!_this.staticMoving && _lastAngle) {
+
+	                _lastAngle *= Math.sqrt(1.0 - _this.dynamicDampingFactor);
+	                _eye.copy(_this.object.position).sub(_this.target);
+	                quaternion.setFromAxisAngle(_lastAxis, _lastAngle);
+	                _eye.applyQuaternion(quaternion);
+	                _this.object.up.applyQuaternion(quaternion);
+	            }
+
+	            _movePrev.copy(_moveCurr);
+	        };
+	    }();
+
+	    this.zoomCamera = function () {
+
+	        var factor;
+
+	        if (_state === STATE.TOUCH_ZOOM_PAN) {
+
+	            factor = _touchZoomDistanceStart / _touchZoomDistanceEnd;
+	            _touchZoomDistanceStart = _touchZoomDistanceEnd;
+	            _eye.multiplyScalar(factor);
+	        } else {
+
+	            factor = 1.0 + (_zoomEnd.y - _zoomStart.y) * _this.zoomSpeed;
+
+	            if (factor !== 1.0 && factor > 0.0) {
+
+	                _eye.multiplyScalar(factor);
+	            }
+
+	            if (_this.staticMoving) {
+
+	                _zoomStart.copy(_zoomEnd);
+	            } else {
+
+	                _zoomStart.y += (_zoomEnd.y - _zoomStart.y) * this.dynamicDampingFactor;
+	            }
+	        }
+	    };
+
+	    this.panCamera = function () {
+
+	        var mouseChange = new THREE.Vector2(),
+	            objectUp = new THREE.Vector3(),
+	            pan = new THREE.Vector3();
+
+	        return function panCamera() {
+
+	            mouseChange.copy(_panEnd).sub(_panStart);
+
+	            if (mouseChange.lengthSq()) {
+
+	                mouseChange.multiplyScalar(_eye.length() * _this.panSpeed);
+
+	                pan.copy(_eye).cross(_this.object.up).setLength(mouseChange.x);
+	                pan.add(objectUp.copy(_this.object.up).setLength(mouseChange.y));
+
+	                _this.object.position.add(pan);
+	                _this.target.add(pan);
+
+	                if (_this.staticMoving) {
+
+	                    _panStart.copy(_panEnd);
+	                } else {
+
+	                    _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
+	                }
+	            }
+	        };
+	    }();
+
+	    this.checkDistances = function () {
+
+	        if (!_this.noZoom || !_this.noPan) {
+
+	            if (_eye.lengthSq() > _this.maxDistance * _this.maxDistance) {
+
+	                _this.object.position.addVectors(_this.target, _eye.setLength(_this.maxDistance));
+	                _zoomStart.copy(_zoomEnd);
+	            }
+
+	            if (_eye.lengthSq() < _this.minDistance * _this.minDistance) {
+
+	                _this.object.position.addVectors(_this.target, _eye.setLength(_this.minDistance));
+	                _zoomStart.copy(_zoomEnd);
+	            }
+	        }
+	    };
+
+	    this.update = function () {
+
+	        _eye.subVectors(_this.object.position, _this.target);
+
+	        if (!_this.noRotate) {
+
+	            _this.rotateCamera();
+	        }
+
+	        if (!_this.noZoom) {
+
+	            _this.zoomCamera();
+	        }
+
+	        if (!_this.noPan) {
+
+	            _this.panCamera();
+	        }
+
+	        _this.object.position.addVectors(_this.target, _eye);
+
+	        _this.checkDistances();
+
+	        _this.object.lookAt(_this.target);
+
+	        if (lastPosition.distanceToSquared(_this.object.position) > EPS) {
+
+	            _this.dispatchEvent(changeEvent);
+
+	            lastPosition.copy(_this.object.position);
+	        }
+	    };
+
+	    this.reset = function () {
+
+	        _state = STATE.NONE;
+	        _prevState = STATE.NONE;
+
+	        _this.target.copy(_this.target0);
+	        _this.object.position.copy(_this.position0);
+	        _this.object.up.copy(_this.up0);
+
+	        _eye.subVectors(_this.object.position, _this.target);
+
+	        _this.object.lookAt(_this.target);
+
+	        _this.dispatchEvent(changeEvent);
+
+	        lastPosition.copy(_this.object.position);
+	    };
+
+	    // listeners
+
+	    function keydown(event) {
+
+	        if (_this.enabled === false) return;
+
+	        window.removeEventListener('keydown', keydown);
+
+	        _prevState = _state;
+
+	        if (_state !== STATE.NONE) {
+
+	            return;
+	        } else if (event.keyCode === _this.keys[STATE.ROTATE] && !_this.noRotate) {
+
+	            _state = STATE.ROTATE;
+	        } else if (event.keyCode === _this.keys[STATE.ZOOM] && !_this.noZoom) {
+
+	            _state = STATE.ZOOM;
+	        } else if (event.keyCode === _this.keys[STATE.PAN] && !_this.noPan) {
+
+	            _state = STATE.PAN;
+	        }
+	    }
+
+	    function keyup(event) {
+
+	        if (_this.enabled === false) return;
+
+	        _state = _prevState;
+
+	        window.addEventListener('keydown', keydown, false);
+	    }
+
+	    function mousedown(event) {
+
+	        if (_this.enabled === false) return;
+
+	        event.preventDefault();
+	        event.stopPropagation();
+
+	        if (_state === STATE.NONE) {
+
+	            _state = event.button;
+	        }
+
+	        if (_state === STATE.ROTATE && !_this.noRotate) {
+
+	            _moveCurr.copy(getMouseOnCircle(event.pageX, event.pageY));
+	            _movePrev.copy(_moveCurr);
+	        } else if (_state === STATE.ZOOM && !_this.noZoom) {
+
+	            _zoomStart.copy(getMouseOnScreen(event.pageX, event.pageY));
+	            _zoomEnd.copy(_zoomStart);
+	        } else if (_state === STATE.PAN && !_this.noPan) {
+
+	            _panStart.copy(getMouseOnScreen(event.pageX, event.pageY));
+	            _panEnd.copy(_panStart);
+	        }
+
+	        document.addEventListener('mousemove', mousemove, false);
+	        document.addEventListener('mouseup', mouseup, false);
+
+	        _this.dispatchEvent(startEvent);
+	    }
+
+	    function mousemove(event) {
+
+	        if (_this.enabled === false) return;
+
+	        event.preventDefault();
+	        event.stopPropagation();
+
+	        if (_state === STATE.ROTATE && !_this.noRotate) {
+
+	            _movePrev.copy(_moveCurr);
+	            _moveCurr.copy(getMouseOnCircle(event.pageX, event.pageY));
+	        } else if (_state === STATE.ZOOM && !_this.noZoom) {
+
+	            _zoomEnd.copy(getMouseOnScreen(event.pageX, event.pageY));
+	        } else if (_state === STATE.PAN && !_this.noPan) {
+
+	            _panEnd.copy(getMouseOnScreen(event.pageX, event.pageY));
+	        }
+	    }
+
+	    function mouseup(event) {
+
+	        if (_this.enabled === false) return;
+
+	        event.preventDefault();
+	        event.stopPropagation();
+
+	        _state = STATE.NONE;
+
+	        document.removeEventListener('mousemove', mousemove);
+	        document.removeEventListener('mouseup', mouseup);
+	        _this.dispatchEvent(endEvent);
+	    }
+
+	    function mousewheel(event) {
+
+	        if (_this.enabled === false) return;
+
+	        event.preventDefault();
+	        event.stopPropagation();
+
+	        _zoomStart.y -= event.deltaY * 0.01;
+
+	        _this.dispatchEvent(startEvent);
+	        _this.dispatchEvent(endEvent);
+	    }
+
+	    function touchstart(event) {
+
+	        if (_this.enabled === false) return;
+
+	        switch (event.touches.length) {
+
+	            case 1:
+	                _state = STATE.TOUCH_ROTATE;
+	                _moveCurr.copy(getMouseOnCircle(event.touches[0].pageX, event.touches[0].pageY));
+	                _movePrev.copy(_moveCurr);
+	                break;
+
+	            default:
+	                // 2 or more
+	                _state = STATE.TOUCH_ZOOM_PAN;
+	                var dx = event.touches[0].pageX - event.touches[1].pageX;
+	                var dy = event.touches[0].pageY - event.touches[1].pageY;
+	                _touchZoomDistanceEnd = _touchZoomDistanceStart = Math.sqrt(dx * dx + dy * dy);
+
+	                var x = (event.touches[0].pageX + event.touches[1].pageX) / 2;
+	                var y = (event.touches[0].pageY + event.touches[1].pageY) / 2;
+	                _panStart.copy(getMouseOnScreen(x, y));
+	                _panEnd.copy(_panStart);
+	                break;
+
+	        }
+
+	        _this.dispatchEvent(startEvent);
+	    }
+
+	    function touchmove(event) {
+
+	        if (_this.enabled === false) return;
+
+	        event.preventDefault();
+	        event.stopPropagation();
+
+	        switch (event.touches.length) {
+
+	            case 1:
+	                _movePrev.copy(_moveCurr);
+	                _moveCurr.copy(getMouseOnCircle(event.touches[0].pageX, event.touches[0].pageY));
+	                break;
+
+	            default:
+	                // 2 or more
+	                var dx = event.touches[0].pageX - event.touches[1].pageX;
+	                var dy = event.touches[0].pageY - event.touches[1].pageY;
+	                _touchZoomDistanceEnd = Math.sqrt(dx * dx + dy * dy);
+
+	                var x = (event.touches[0].pageX + event.touches[1].pageX) / 2;
+	                var y = (event.touches[0].pageY + event.touches[1].pageY) / 2;
+	                _panEnd.copy(getMouseOnScreen(x, y));
+	                break;
+
+	        }
+	    }
+
+	    function touchend(event) {
+
+	        if (_this.enabled === false) return;
+
+	        switch (event.touches.length) {
+
+	            case 0:
+	                _state = STATE.NONE;
+	                break;
+
+	            case 1:
+	                _state = STATE.TOUCH_ROTATE;
+	                _moveCurr.copy(getMouseOnCircle(event.touches[0].pageX, event.touches[0].pageY));
+	                _movePrev.copy(_moveCurr);
+	                break;
+
+	        }
+
+	        _this.dispatchEvent(endEvent);
+	    }
+
+	    function contextmenu(event) {
+
+	        event.preventDefault();
+	    }
+
+	    this.dispose = function () {
+
+	        this.domElement.removeEventListener('contextmenu', contextmenu, false);
+	        this.domElement.removeEventListener('mousedown', mousedown, false);
+	        this.domElement.removeEventListener('wheel', mousewheel, false);
+
+	        this.domElement.removeEventListener('touchstart', touchstart, false);
+	        this.domElement.removeEventListener('touchend', touchend, false);
+	        this.domElement.removeEventListener('touchmove', touchmove, false);
+
+	        document.removeEventListener('mousemove', mousemove, false);
+	        document.removeEventListener('mouseup', mouseup, false);
+
+	        window.removeEventListener('keydown', keydown, false);
+	        window.removeEventListener('keyup', keyup, false);
+	    };
+
+	    this.domElement.addEventListener('contextmenu', contextmenu, false);
+	    this.domElement.addEventListener('mousedown', mousedown, false);
+	    this.domElement.addEventListener('wheel', mousewheel, false);
+
+	    this.domElement.addEventListener('touchstart', touchstart, false);
+	    this.domElement.addEventListener('touchend', touchend, false);
+	    this.domElement.addEventListener('touchmove', touchmove, false);
+
+	    window.addEventListener('keydown', keydown, false);
+	    window.addEventListener('keyup', keyup, false);
+
+	    this.handleResize();
+
+	    // force an update at start
+	    this.update();
+	};
+
+	THREE.TrackballControls.prototype = (0, _create2.default)(THREE.EventDispatcher.prototype);
+	THREE.TrackballControls.prototype.constructor = THREE.TrackballControls;
+
+/***/ },
+/* 112 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _three = __webpack_require__(77);
+
+	var THREE = _interopRequireWildcard(_three);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	THREE.PointerLockControls = function (camera) {
+
+	  var scope = this;
+
+	  camera.rotation.set(0, 0, 0);
+
+	  var pitchObject = new THREE.Object3D();
+	  pitchObject.add(camera);
+
+	  var yawObject = new THREE.Object3D();
+	  yawObject.position.y = 10;
+	  yawObject.add(pitchObject);
+
+	  var PI_2 = Math.PI / 2;
+
+	  var onMouseMove = function onMouseMove(event) {
+
+	    if (scope.enabled === false) return;
+
+	    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+	    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+	    yawObject.rotation.y -= movementX * 0.002;
+	    pitchObject.rotation.x -= movementY * 0.002;
+
+	    pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
+	  };
+
+	  this.dispose = function () {
+
+	    document.removeEventListener('mousemove', onMouseMove, false);
+	  };
+
+	  document.addEventListener('mousemove', onMouseMove, false);
+
+	  this.enabled = false;
+
+	  this.getObject = function () {
+
+	    return yawObject;
+	  };
+
+	  this.getDirection = function () {
+
+	    // assumes the camera itself is not rotated
+
+	    var direction = new THREE.Vector3(0, 0, -1);
+	    var rotation = new THREE.Euler(0, 0, 0, "YXZ");
+
+	    return function (v) {
+
+	      rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
+
+	      v.copy(direction).applyEuler(rotation);
+
+	      return v;
+	    };
+	  }();
+	}; /**
+	    * @author mrdoob / http://mrdoob.com/
+	    */
+
+/***/ },
+/* 113 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = undefined;
 
 	var _classCallCheck2 = __webpack_require__(75);
 
@@ -20892,127 +21531,287 @@
 
 	var _createClass3 = _interopRequireDefault(_createClass2);
 
-	var _lodash = __webpack_require__(127);
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var _lodash2 = _interopRequireDefault(_lodash);
+	var instances = {};
 
-	var _chunkNoiseViewer = __webpack_require__(129);
+	var _Perf = function () {
+	  function _Perf(name) {
+	    (0, _classCallCheck3.default)(this, _Perf);
 
-	var _chunkNoiseViewer2 = _interopRequireDefault(_chunkNoiseViewer);
+	    this.name = name;
+	    this.timeStart = new Date().getTime();
+	  }
 
-	var _noisejs = __webpack_require__(136);
+	  (0, _createClass3.default)(_Perf, [{
+	    key: 'end',
+	    value: function end() {
+	      this.timeEnd = new Date().getTime();
+	      console.log((this.timeEnd - this.timeStart) / 1000 + 's');
+	    }
+	  }]);
+	  return _Perf;
+	}();
 
-	var _utils = __webpack_require__(137);
+	var Perf = function () {
+	  function Perf(name) {
+	    (0, _classCallCheck3.default)(this, Perf);
+	  }
 
-	var _utils2 = _interopRequireDefault(_utils);
+	  (0, _createClass3.default)(Perf, null, [{
+	    key: 'get',
+	    value: function get(name) {
+	      if (typeof instances[name] === 'undefined') {
+	        instances[name] = new _Perf();
+	      }
+
+	      return instances[name];
+	    }
+	  }]);
+	  return Perf;
+	}();
+
+	exports.default = Perf;
+
+/***/ },
+/* 114 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = undefined;
+
+	var _promise = __webpack_require__(115);
+
+	var _promise2 = _interopRequireDefault(_promise);
+
+	var _regenerator = __webpack_require__(131);
+
+	var _regenerator2 = _interopRequireDefault(_regenerator);
+
+	var _asyncToGenerator2 = __webpack_require__(135);
+
+	var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+	var _classCallCheck2 = __webpack_require__(75);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(76);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _three = __webpack_require__(77);
+
+	var _chunk = __webpack_require__(136);
+
+	var _chunk2 = _interopRequireDefault(_chunk);
+
+	var _config = __webpack_require__(146);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _perf = __webpack_require__(113);
+
+	var _perf2 = _interopRequireDefault(_perf);
+
+	var _jquery = __webpack_require__(109);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var ChunkNoiseWorker = __webpack_require__(138);
+	var World = function () {
+	  function World(app) {
+	    (0, _classCallCheck3.default)(this, World);
 
-	var WorldGen = function () {
-	  function WorldGen(seed, options) {
-	    var _this = this;
-
-	    (0, _classCallCheck3.default)(this, WorldGen);
-	    this.cb = null;
-	    this.cubeNoiseCache = {};
-	    this.defaultOptions = {
-	      chunkSize: { width: 26, height: 26 }
-	    };
-
-	    this.seed = seed;
-	    this.cfg = _lodash2.default.merge(this.defaultOptions, options);
-	    this.helperNoise1 = new _chunkNoiseViewer2.default({
-	      left: 0,
-	      top: 0
-	    });
-	    this.helperNoise2 = new _chunkNoiseViewer2.default({
-	      right: 0,
-	      top: 0
-	    });
-	    this.readyPromise = new _promise2.default(function (resolve) {
-	      _this.generateNoise(resolve);
-	    });
+	    this.seed = _config2.default.seed;
+	    this.chunk = new _chunk2.default(this.seed);
+	    this.app = app;
+	    this.generateChunks();
 	  }
 
-	  (0, _createClass3.default)(WorldGen, [{
-	    key: 'generateNoise',
-	    value: function generateNoise(resolve) {
-	      var _this2 = this;
+	  (0, _createClass3.default)(World, [{
+	    key: 'generateChunks',
+	    value: function () {
+	      var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
+	        var $msg, chanks, x, y, $current;
+	        return _regenerator2.default.wrap(function _callee$(_context) {
+	          while (1) {
+	            switch (_context.prev = _context.next) {
+	              case 0:
+	                $msg = (0, _jquery2.default)('<div id="msg_warning">Loading <span class="current">1</span> of <span>50</span> chunks ...<br>It can be a bit slow before finishing :)</div>');
 
-	      var worker = new ChunkNoiseWorker();
-	      worker.postMessage({
-	        seed: this.seed,
-	        chunkSize: this.defaultOptions.chunkSize.width,
-	        mod: 30
-	      });
-	      worker.onmessage = function (e) {
-	        _this2.cubeNoiseCache = e.data;
-	        resolve();
-	      };
-	    }
-	  }, {
-	    key: 'ready',
-	    value: function ready(cb) {
-	      this.readyPromise.then(cb);
-	    }
+	                (0, _jquery2.default)('body').append($msg);
 
-	    /**
-	     * Generate chunk,
-	     * @param cb
-	     */
+	                chanks = 6;
+	                x = 0;
 
+	              case 4:
+	                if (!(x <= chanks)) {
+	                  _context.next = 17;
+	                  break;
+	                }
+
+	                y = 0;
+
+	              case 6:
+	                if (!(y <= chanks)) {
+	                  _context.next = 14;
+	                  break;
+	                }
+
+	                _context.next = 9;
+	                return this.generateChunk({ x: x, y: y });
+
+	              case 9:
+	                $current = $msg.find('span.current');
+
+	                $current.html(parseInt($current.html()) + 1);
+
+	              case 11:
+	                y++;
+	                _context.next = 6;
+	                break;
+
+	              case 14:
+	                x++;
+	                _context.next = 4;
+	                break;
+
+	              case 17:
+	                $msg.remove();
+
+	              case 18:
+	              case 'end':
+	                return _context.stop();
+	            }
+	          }
+	        }, _callee, this);
+	      }));
+
+	      function generateChunks() {
+	        return _ref.apply(this, arguments);
+	      }
+
+	      return generateChunks;
+	    }()
 	  }, {
 	    key: 'generateChunk',
-	    value: function generateChunk(cb) {
-	      this.cb = cb;
-	      for (var p in this.cubeNoiseCache) {
-	        // this.helperNoise2.add(x, y, z, noiseValue);
-	        cb(this.cubeNoiseCache[p].location.x, this.cubeNoiseCache[p].location.y, this.cubeNoiseCache[p].location.z, this.cubeNoiseCache[p].surrounding);
-	      }
-	      this.helperNoise1.end();
-	      this.helperNoise2.end();
+	    value: function generateChunk(location) {
+	      var _this = this;
+
+	      return new _promise2.default(function (resolve) {
+	        var chunk = _this.chunk;
+	        var cubeSize = _config2.default.cubeSize;
+
+	        var matrix = new _three.Matrix4();
+	        var pxGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	        pxGeometry.rotateY(Math.PI / 2);
+	        pxGeometry.translate(cubeSize / 2, 0, 0);
+	        var nxGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	        nxGeometry.rotateY(-Math.PI / 2);
+	        nxGeometry.translate(-cubeSize / 2, 0, 0);
+	        var pyGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	        pyGeometry.rotateX(-Math.PI / 2);
+	        pyGeometry.translate(0, cubeSize / 2, 0);
+	        var pzGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	        pzGeometry.translate(0, 0, cubeSize / 2);
+	        var nzGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	        nzGeometry.rotateY(Math.PI);
+	        nzGeometry.translate(0, 0, -cubeSize / 2);
+	        var nyGeometry = new _three.PlaneBufferGeometry(cubeSize, cubeSize);
+	        nyGeometry.rotateX(Math.PI / 2);
+	        nyGeometry.translate(0, -cubeSize / 2, 0);
+
+	        // BufferGeometry
+	        var tmpGeometry = new _three.Geometry();
+	        var pxTmpGeometry = new _three.Geometry().fromBufferGeometry(pxGeometry);
+	        var nxTmpGeometry = new _three.Geometry().fromBufferGeometry(nxGeometry);
+	        var pyTmpGeometry = new _three.Geometry().fromBufferGeometry(pyGeometry);
+	        var pzTmpGeometry = new _three.Geometry().fromBufferGeometry(pzGeometry);
+	        var nzTmpGeometry = new _three.Geometry().fromBufferGeometry(nzGeometry);
+	        var nyTmpGeometry = new _three.Geometry().fromBufferGeometry(nyGeometry);
+
+	        // generate chunk
+	        var stats = { drawn: 0 };
+	        chunk.generateChunk(location, function (x, y, z, surrounding) {
+
+	          stats.drawn++;
+	          matrix.makeTranslation(x * cubeSize, y * cubeSize, z * cubeSize);
+
+	          // Check what cube geometry should be drawn
+	          if (!surrounding.px) {
+	            tmpGeometry.merge(pxTmpGeometry, matrix);
+	          }
+	          if (!surrounding.nx) {
+	            tmpGeometry.merge(nxTmpGeometry, matrix);
+	          }
+	          if (!surrounding.py) {
+	            tmpGeometry.merge(pyTmpGeometry, matrix);
+	          }
+	          if (!surrounding.pz) {
+	            tmpGeometry.merge(pzTmpGeometry, matrix);
+	          }
+	          if (!surrounding.nz) {
+	            tmpGeometry.merge(nzTmpGeometry, matrix);
+	          }
+	          if (!surrounding.ny) {
+	            tmpGeometry.merge(nyTmpGeometry, matrix);
+	          }
+	        }).then(function () {
+	          var geometry = new _three.BufferGeometry().fromGeometry(tmpGeometry);
+	          geometry.computeBoundingSphere();
+	          var texture = new _three.TextureLoader().load("../assets/textures/blocks/hardened_clay_stained_green.png");
+	          var mesh = new _three.Mesh(geometry, new _three.MeshLambertMaterial({ map: texture })); // , side: DoubleSide
+	          _this.app.scene.add(mesh);
+	          _perf2.default.get('PERF_start_end').end();
+	          resolve();
+	        });
+	      });
 	    }
 	  }]);
-	  return WorldGen;
+	  return World;
 	}();
 
-	exports.default = WorldGen;
+	exports.default = World;
 
 /***/ },
-/* 111 */
+/* 115 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(112), __esModule: true };
+	module.exports = { "default": __webpack_require__(116), __esModule: true };
 
 /***/ },
-/* 112 */
+/* 116 */
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(70);
 	__webpack_require__(23);
 	__webpack_require__(52);
-	__webpack_require__(113);
+	__webpack_require__(117);
 	module.exports = __webpack_require__(7).Promise;
 
 /***/ },
-/* 113 */
+/* 117 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	var LIBRARY            = __webpack_require__(28)
 	  , global             = __webpack_require__(6)
 	  , ctx                = __webpack_require__(8)
-	  , classof            = __webpack_require__(114)
+	  , classof            = __webpack_require__(118)
 	  , $export            = __webpack_require__(5)
 	  , isObject           = __webpack_require__(13)
 	  , aFunction          = __webpack_require__(9)
-	  , anInstance         = __webpack_require__(115)
-	  , forOf              = __webpack_require__(116)
-	  , speciesConstructor = __webpack_require__(120)
-	  , task               = __webpack_require__(121).set
-	  , microtask          = __webpack_require__(123)()
+	  , anInstance         = __webpack_require__(119)
+	  , forOf              = __webpack_require__(120)
+	  , speciesConstructor = __webpack_require__(124)
+	  , task               = __webpack_require__(125).set
+	  , microtask          = __webpack_require__(127)()
 	  , PROMISE            = 'Promise'
 	  , TypeError          = global.TypeError
 	  , process            = global.process
@@ -21204,7 +22003,7 @@
 	    this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
 	    this._n = false;          // <- notify
 	  };
-	  Internal.prototype = __webpack_require__(124)($Promise.prototype, {
+	  Internal.prototype = __webpack_require__(128)($Promise.prototype, {
 	    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
 	    then: function then(onFulfilled, onRejected){
 	      var reaction    = newPromiseCapability(speciesConstructor(this, $Promise));
@@ -21231,7 +22030,7 @@
 
 	$export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: $Promise});
 	__webpack_require__(48)($Promise, PROMISE);
-	__webpack_require__(125)(PROMISE);
+	__webpack_require__(129)(PROMISE);
 	Wrapper = __webpack_require__(7)[PROMISE];
 
 	// statics
@@ -21255,7 +22054,7 @@
 	    return capability.promise;
 	  }
 	});
-	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(126)(function(iter){
+	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(130)(function(iter){
 	  $Promise.all(iter)['catch'](empty);
 	})), PROMISE, {
 	  // 25.4.4.1 Promise.all(iterable)
@@ -21301,7 +22100,7 @@
 	});
 
 /***/ },
-/* 114 */
+/* 118 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// getting tag from 19.1.3.6 Object.prototype.toString()
@@ -21329,7 +22128,7 @@
 	};
 
 /***/ },
-/* 115 */
+/* 119 */
 /***/ function(module, exports) {
 
 	module.exports = function(it, Constructor, name, forbiddenField){
@@ -21339,15 +22138,15 @@
 	};
 
 /***/ },
-/* 116 */
+/* 120 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx         = __webpack_require__(8)
-	  , call        = __webpack_require__(117)
-	  , isArrayIter = __webpack_require__(118)
+	  , call        = __webpack_require__(121)
+	  , isArrayIter = __webpack_require__(122)
 	  , anObject    = __webpack_require__(12)
 	  , toLength    = __webpack_require__(41)
-	  , getIterFn   = __webpack_require__(119)
+	  , getIterFn   = __webpack_require__(123)
 	  , BREAK       = {}
 	  , RETURN      = {};
 	var exports = module.exports = function(iterable, entries, fn, that, ITERATOR){
@@ -21369,7 +22168,7 @@
 	exports.RETURN = RETURN;
 
 /***/ },
-/* 117 */
+/* 121 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// call something on iterator step with safe closing on error
@@ -21386,7 +22185,7 @@
 	};
 
 /***/ },
-/* 118 */
+/* 122 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// check on default Array iterator
@@ -21399,10 +22198,10 @@
 	};
 
 /***/ },
-/* 119 */
+/* 123 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var classof   = __webpack_require__(114)
+	var classof   = __webpack_require__(118)
 	  , ITERATOR  = __webpack_require__(49)('iterator')
 	  , Iterators = __webpack_require__(31);
 	module.exports = __webpack_require__(7).getIteratorMethod = function(it){
@@ -21412,7 +22211,7 @@
 	};
 
 /***/ },
-/* 120 */
+/* 124 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 7.3.20 SpeciesConstructor(O, defaultConstructor)
@@ -21425,11 +22224,11 @@
 	};
 
 /***/ },
-/* 121 */
+/* 125 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx                = __webpack_require__(8)
-	  , invoke             = __webpack_require__(122)
+	  , invoke             = __webpack_require__(126)
 	  , html               = __webpack_require__(47)
 	  , cel                = __webpack_require__(17)
 	  , global             = __webpack_require__(6)
@@ -21505,7 +22304,7 @@
 	};
 
 /***/ },
-/* 122 */
+/* 126 */
 /***/ function(module, exports) {
 
 	// fast apply, http://jsperf.lnkit.com/fast-apply/5
@@ -21526,11 +22325,11 @@
 	};
 
 /***/ },
-/* 123 */
+/* 127 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var global    = __webpack_require__(6)
-	  , macrotask = __webpack_require__(121).set
+	  , macrotask = __webpack_require__(125).set
 	  , Observer  = global.MutationObserver || global.WebKitMutationObserver
 	  , process   = global.process
 	  , Promise   = global.Promise
@@ -21599,7 +22398,7 @@
 	};
 
 /***/ },
-/* 124 */
+/* 128 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var hide = __webpack_require__(10);
@@ -21611,7 +22410,7 @@
 	};
 
 /***/ },
-/* 125 */
+/* 129 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21630,7 +22429,7 @@
 	};
 
 /***/ },
-/* 126 */
+/* 130 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ITERATOR     = __webpack_require__(49)('iterator')
@@ -21656,7 +22455,1071 @@
 	};
 
 /***/ },
-/* 127 */
+/* 131 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(132);
+
+
+/***/ },
+/* 132 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {// This method of obtaining a reference to the global object needs to be
+	// kept identical to the way it is obtained in runtime.js
+	var g =
+	  typeof global === "object" ? global :
+	  typeof window === "object" ? window :
+	  typeof self === "object" ? self : this;
+
+	// Use `getOwnPropertyNames` because not all browsers support calling
+	// `hasOwnProperty` on the global `self` object in a worker. See #183.
+	var hadRuntime = g.regeneratorRuntime &&
+	  Object.getOwnPropertyNames(g).indexOf("regeneratorRuntime") >= 0;
+
+	// Save the old regeneratorRuntime in case it needs to be restored later.
+	var oldRuntime = hadRuntime && g.regeneratorRuntime;
+
+	// Force reevalutation of runtime.js.
+	g.regeneratorRuntime = undefined;
+
+	module.exports = __webpack_require__(133);
+
+	if (hadRuntime) {
+	  // Restore the original runtime.
+	  g.regeneratorRuntime = oldRuntime;
+	} else {
+	  // Remove the global property added by runtime.js.
+	  try {
+	    delete g.regeneratorRuntime;
+	  } catch(e) {
+	    g.regeneratorRuntime = undefined;
+	  }
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 133 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global, process) {/**
+	 * Copyright (c) 2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
+	 * additional grant of patent rights can be found in the PATENTS file in
+	 * the same directory.
+	 */
+
+	!(function(global) {
+	  "use strict";
+
+	  var hasOwn = Object.prototype.hasOwnProperty;
+	  var undefined; // More compressible than void 0.
+	  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+	  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+	  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+	  var inModule = typeof module === "object";
+	  var runtime = global.regeneratorRuntime;
+	  if (runtime) {
+	    if (inModule) {
+	      // If regeneratorRuntime is defined globally and we're in a module,
+	      // make the exports object identical to regeneratorRuntime.
+	      module.exports = runtime;
+	    }
+	    // Don't bother evaluating the rest of this file if the runtime was
+	    // already defined globally.
+	    return;
+	  }
+
+	  // Define the runtime globally (as expected by generated code) as either
+	  // module.exports (if we're in a module) or a new, empty object.
+	  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
+
+	  function wrap(innerFn, outerFn, self, tryLocsList) {
+	    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+	    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+	    var generator = Object.create(protoGenerator.prototype);
+	    var context = new Context(tryLocsList || []);
+
+	    // The ._invoke method unifies the implementations of the .next,
+	    // .throw, and .return methods.
+	    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+	    return generator;
+	  }
+	  runtime.wrap = wrap;
+
+	  // Try/catch helper to minimize deoptimizations. Returns a completion
+	  // record like context.tryEntries[i].completion. This interface could
+	  // have been (and was previously) designed to take a closure to be
+	  // invoked without arguments, but in all the cases we care about we
+	  // already have an existing method we want to call, so there's no need
+	  // to create a new function object. We can even get away with assuming
+	  // the method takes exactly one argument, since that happens to be true
+	  // in every case, so we don't have to touch the arguments object. The
+	  // only additional allocation required is the completion record, which
+	  // has a stable shape and so hopefully should be cheap to allocate.
+	  function tryCatch(fn, obj, arg) {
+	    try {
+	      return { type: "normal", arg: fn.call(obj, arg) };
+	    } catch (err) {
+	      return { type: "throw", arg: err };
+	    }
+	  }
+
+	  var GenStateSuspendedStart = "suspendedStart";
+	  var GenStateSuspendedYield = "suspendedYield";
+	  var GenStateExecuting = "executing";
+	  var GenStateCompleted = "completed";
+
+	  // Returning this object from the innerFn has the same effect as
+	  // breaking out of the dispatch switch statement.
+	  var ContinueSentinel = {};
+
+	  // Dummy constructor functions that we use as the .constructor and
+	  // .constructor.prototype properties for functions that return Generator
+	  // objects. For full spec compliance, you may wish to configure your
+	  // minifier not to mangle the names of these two functions.
+	  function Generator() {}
+	  function GeneratorFunction() {}
+	  function GeneratorFunctionPrototype() {}
+
+	  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype;
+	  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+	  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+	  GeneratorFunctionPrototype[toStringTagSymbol] = GeneratorFunction.displayName = "GeneratorFunction";
+
+	  // Helper for defining the .next, .throw, and .return methods of the
+	  // Iterator interface in terms of a single ._invoke method.
+	  function defineIteratorMethods(prototype) {
+	    ["next", "throw", "return"].forEach(function(method) {
+	      prototype[method] = function(arg) {
+	        return this._invoke(method, arg);
+	      };
+	    });
+	  }
+
+	  runtime.isGeneratorFunction = function(genFun) {
+	    var ctor = typeof genFun === "function" && genFun.constructor;
+	    return ctor
+	      ? ctor === GeneratorFunction ||
+	        // For the native GeneratorFunction constructor, the best we can
+	        // do is to check its .name property.
+	        (ctor.displayName || ctor.name) === "GeneratorFunction"
+	      : false;
+	  };
+
+	  runtime.mark = function(genFun) {
+	    if (Object.setPrototypeOf) {
+	      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+	    } else {
+	      genFun.__proto__ = GeneratorFunctionPrototype;
+	      if (!(toStringTagSymbol in genFun)) {
+	        genFun[toStringTagSymbol] = "GeneratorFunction";
+	      }
+	    }
+	    genFun.prototype = Object.create(Gp);
+	    return genFun;
+	  };
+
+	  // Within the body of any async function, `await x` is transformed to
+	  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+	  // `value instanceof AwaitArgument` to determine if the yielded value is
+	  // meant to be awaited. Some may consider the name of this method too
+	  // cutesy, but they are curmudgeons.
+	  runtime.awrap = function(arg) {
+	    return new AwaitArgument(arg);
+	  };
+
+	  function AwaitArgument(arg) {
+	    this.arg = arg;
+	  }
+
+	  function AsyncIterator(generator) {
+	    function invoke(method, arg, resolve, reject) {
+	      var record = tryCatch(generator[method], generator, arg);
+	      if (record.type === "throw") {
+	        reject(record.arg);
+	      } else {
+	        var result = record.arg;
+	        var value = result.value;
+	        if (value instanceof AwaitArgument) {
+	          return Promise.resolve(value.arg).then(function(value) {
+	            invoke("next", value, resolve, reject);
+	          }, function(err) {
+	            invoke("throw", err, resolve, reject);
+	          });
+	        }
+
+	        return Promise.resolve(value).then(function(unwrapped) {
+	          // When a yielded Promise is resolved, its final value becomes
+	          // the .value of the Promise<{value,done}> result for the
+	          // current iteration. If the Promise is rejected, however, the
+	          // result for this iteration will be rejected with the same
+	          // reason. Note that rejections of yielded Promises are not
+	          // thrown back into the generator function, as is the case
+	          // when an awaited Promise is rejected. This difference in
+	          // behavior between yield and await is important, because it
+	          // allows the consumer to decide what to do with the yielded
+	          // rejection (swallow it and continue, manually .throw it back
+	          // into the generator, abandon iteration, whatever). With
+	          // await, by contrast, there is no opportunity to examine the
+	          // rejection reason outside the generator function, so the
+	          // only option is to throw it from the await expression, and
+	          // let the generator function handle the exception.
+	          result.value = unwrapped;
+	          resolve(result);
+	        }, reject);
+	      }
+	    }
+
+	    if (typeof process === "object" && process.domain) {
+	      invoke = process.domain.bind(invoke);
+	    }
+
+	    var previousPromise;
+
+	    function enqueue(method, arg) {
+	      function callInvokeWithMethodAndArg() {
+	        return new Promise(function(resolve, reject) {
+	          invoke(method, arg, resolve, reject);
+	        });
+	      }
+
+	      return previousPromise =
+	        // If enqueue has been called before, then we want to wait until
+	        // all previous Promises have been resolved before calling invoke,
+	        // so that results are always delivered in the correct order. If
+	        // enqueue has not been called before, then it is important to
+	        // call invoke immediately, without waiting on a callback to fire,
+	        // so that the async generator function has the opportunity to do
+	        // any necessary setup in a predictable way. This predictability
+	        // is why the Promise constructor synchronously invokes its
+	        // executor callback, and why async functions synchronously
+	        // execute code before the first await. Since we implement simple
+	        // async functions in terms of async generators, it is especially
+	        // important to get this right, even though it requires care.
+	        previousPromise ? previousPromise.then(
+	          callInvokeWithMethodAndArg,
+	          // Avoid propagating failures to Promises returned by later
+	          // invocations of the iterator.
+	          callInvokeWithMethodAndArg
+	        ) : callInvokeWithMethodAndArg();
+	    }
+
+	    // Define the unified helper method that is used to implement .next,
+	    // .throw, and .return (see defineIteratorMethods).
+	    this._invoke = enqueue;
+	  }
+
+	  defineIteratorMethods(AsyncIterator.prototype);
+
+	  // Note that simple async functions are implemented on top of
+	  // AsyncIterator objects; they just return a Promise for the value of
+	  // the final result produced by the iterator.
+	  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
+	    var iter = new AsyncIterator(
+	      wrap(innerFn, outerFn, self, tryLocsList)
+	    );
+
+	    return runtime.isGeneratorFunction(outerFn)
+	      ? iter // If outerFn is a generator, return the full iterator.
+	      : iter.next().then(function(result) {
+	          return result.done ? result.value : iter.next();
+	        });
+	  };
+
+	  function makeInvokeMethod(innerFn, self, context) {
+	    var state = GenStateSuspendedStart;
+
+	    return function invoke(method, arg) {
+	      if (state === GenStateExecuting) {
+	        throw new Error("Generator is already running");
+	      }
+
+	      if (state === GenStateCompleted) {
+	        if (method === "throw") {
+	          throw arg;
+	        }
+
+	        // Be forgiving, per 25.3.3.3.3 of the spec:
+	        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+	        return doneResult();
+	      }
+
+	      while (true) {
+	        var delegate = context.delegate;
+	        if (delegate) {
+	          if (method === "return" ||
+	              (method === "throw" && delegate.iterator[method] === undefined)) {
+	            // A return or throw (when the delegate iterator has no throw
+	            // method) always terminates the yield* loop.
+	            context.delegate = null;
+
+	            // If the delegate iterator has a return method, give it a
+	            // chance to clean up.
+	            var returnMethod = delegate.iterator["return"];
+	            if (returnMethod) {
+	              var record = tryCatch(returnMethod, delegate.iterator, arg);
+	              if (record.type === "throw") {
+	                // If the return method threw an exception, let that
+	                // exception prevail over the original return or throw.
+	                method = "throw";
+	                arg = record.arg;
+	                continue;
+	              }
+	            }
+
+	            if (method === "return") {
+	              // Continue with the outer return, now that the delegate
+	              // iterator has been terminated.
+	              continue;
+	            }
+	          }
+
+	          var record = tryCatch(
+	            delegate.iterator[method],
+	            delegate.iterator,
+	            arg
+	          );
+
+	          if (record.type === "throw") {
+	            context.delegate = null;
+
+	            // Like returning generator.throw(uncaught), but without the
+	            // overhead of an extra function call.
+	            method = "throw";
+	            arg = record.arg;
+	            continue;
+	          }
+
+	          // Delegate generator ran and handled its own exceptions so
+	          // regardless of what the method was, we continue as if it is
+	          // "next" with an undefined arg.
+	          method = "next";
+	          arg = undefined;
+
+	          var info = record.arg;
+	          if (info.done) {
+	            context[delegate.resultName] = info.value;
+	            context.next = delegate.nextLoc;
+	          } else {
+	            state = GenStateSuspendedYield;
+	            return info;
+	          }
+
+	          context.delegate = null;
+	        }
+
+	        if (method === "next") {
+	          // Setting context._sent for legacy support of Babel's
+	          // function.sent implementation.
+	          context.sent = context._sent = arg;
+
+	        } else if (method === "throw") {
+	          if (state === GenStateSuspendedStart) {
+	            state = GenStateCompleted;
+	            throw arg;
+	          }
+
+	          if (context.dispatchException(arg)) {
+	            // If the dispatched exception was caught by a catch block,
+	            // then let that catch block handle the exception normally.
+	            method = "next";
+	            arg = undefined;
+	          }
+
+	        } else if (method === "return") {
+	          context.abrupt("return", arg);
+	        }
+
+	        state = GenStateExecuting;
+
+	        var record = tryCatch(innerFn, self, context);
+	        if (record.type === "normal") {
+	          // If an exception is thrown from innerFn, we leave state ===
+	          // GenStateExecuting and loop back for another invocation.
+	          state = context.done
+	            ? GenStateCompleted
+	            : GenStateSuspendedYield;
+
+	          var info = {
+	            value: record.arg,
+	            done: context.done
+	          };
+
+	          if (record.arg === ContinueSentinel) {
+	            if (context.delegate && method === "next") {
+	              // Deliberately forget the last sent value so that we don't
+	              // accidentally pass it on to the delegate.
+	              arg = undefined;
+	            }
+	          } else {
+	            return info;
+	          }
+
+	        } else if (record.type === "throw") {
+	          state = GenStateCompleted;
+	          // Dispatch the exception by looping back around to the
+	          // context.dispatchException(arg) call above.
+	          method = "throw";
+	          arg = record.arg;
+	        }
+	      }
+	    };
+	  }
+
+	  // Define Generator.prototype.{next,throw,return} in terms of the
+	  // unified ._invoke helper method.
+	  defineIteratorMethods(Gp);
+
+	  Gp[iteratorSymbol] = function() {
+	    return this;
+	  };
+
+	  Gp[toStringTagSymbol] = "Generator";
+
+	  Gp.toString = function() {
+	    return "[object Generator]";
+	  };
+
+	  function pushTryEntry(locs) {
+	    var entry = { tryLoc: locs[0] };
+
+	    if (1 in locs) {
+	      entry.catchLoc = locs[1];
+	    }
+
+	    if (2 in locs) {
+	      entry.finallyLoc = locs[2];
+	      entry.afterLoc = locs[3];
+	    }
+
+	    this.tryEntries.push(entry);
+	  }
+
+	  function resetTryEntry(entry) {
+	    var record = entry.completion || {};
+	    record.type = "normal";
+	    delete record.arg;
+	    entry.completion = record;
+	  }
+
+	  function Context(tryLocsList) {
+	    // The root entry object (effectively a try statement without a catch
+	    // or a finally block) gives us a place to store values thrown from
+	    // locations where there is no enclosing try statement.
+	    this.tryEntries = [{ tryLoc: "root" }];
+	    tryLocsList.forEach(pushTryEntry, this);
+	    this.reset(true);
+	  }
+
+	  runtime.keys = function(object) {
+	    var keys = [];
+	    for (var key in object) {
+	      keys.push(key);
+	    }
+	    keys.reverse();
+
+	    // Rather than returning an object with a next method, we keep
+	    // things simple and return the next function itself.
+	    return function next() {
+	      while (keys.length) {
+	        var key = keys.pop();
+	        if (key in object) {
+	          next.value = key;
+	          next.done = false;
+	          return next;
+	        }
+	      }
+
+	      // To avoid creating an additional object, we just hang the .value
+	      // and .done properties off the next function object itself. This
+	      // also ensures that the minifier will not anonymize the function.
+	      next.done = true;
+	      return next;
+	    };
+	  };
+
+	  function values(iterable) {
+	    if (iterable) {
+	      var iteratorMethod = iterable[iteratorSymbol];
+	      if (iteratorMethod) {
+	        return iteratorMethod.call(iterable);
+	      }
+
+	      if (typeof iterable.next === "function") {
+	        return iterable;
+	      }
+
+	      if (!isNaN(iterable.length)) {
+	        var i = -1, next = function next() {
+	          while (++i < iterable.length) {
+	            if (hasOwn.call(iterable, i)) {
+	              next.value = iterable[i];
+	              next.done = false;
+	              return next;
+	            }
+	          }
+
+	          next.value = undefined;
+	          next.done = true;
+
+	          return next;
+	        };
+
+	        return next.next = next;
+	      }
+	    }
+
+	    // Return an iterator with no values.
+	    return { next: doneResult };
+	  }
+	  runtime.values = values;
+
+	  function doneResult() {
+	    return { value: undefined, done: true };
+	  }
+
+	  Context.prototype = {
+	    constructor: Context,
+
+	    reset: function(skipTempReset) {
+	      this.prev = 0;
+	      this.next = 0;
+	      // Resetting context._sent for legacy support of Babel's
+	      // function.sent implementation.
+	      this.sent = this._sent = undefined;
+	      this.done = false;
+	      this.delegate = null;
+
+	      this.tryEntries.forEach(resetTryEntry);
+
+	      if (!skipTempReset) {
+	        for (var name in this) {
+	          // Not sure about the optimal order of these conditions:
+	          if (name.charAt(0) === "t" &&
+	              hasOwn.call(this, name) &&
+	              !isNaN(+name.slice(1))) {
+	            this[name] = undefined;
+	          }
+	        }
+	      }
+	    },
+
+	    stop: function() {
+	      this.done = true;
+
+	      var rootEntry = this.tryEntries[0];
+	      var rootRecord = rootEntry.completion;
+	      if (rootRecord.type === "throw") {
+	        throw rootRecord.arg;
+	      }
+
+	      return this.rval;
+	    },
+
+	    dispatchException: function(exception) {
+	      if (this.done) {
+	        throw exception;
+	      }
+
+	      var context = this;
+	      function handle(loc, caught) {
+	        record.type = "throw";
+	        record.arg = exception;
+	        context.next = loc;
+	        return !!caught;
+	      }
+
+	      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+	        var entry = this.tryEntries[i];
+	        var record = entry.completion;
+
+	        if (entry.tryLoc === "root") {
+	          // Exception thrown outside of any try block that could handle
+	          // it, so set the completion value of the entire function to
+	          // throw the exception.
+	          return handle("end");
+	        }
+
+	        if (entry.tryLoc <= this.prev) {
+	          var hasCatch = hasOwn.call(entry, "catchLoc");
+	          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+	          if (hasCatch && hasFinally) {
+	            if (this.prev < entry.catchLoc) {
+	              return handle(entry.catchLoc, true);
+	            } else if (this.prev < entry.finallyLoc) {
+	              return handle(entry.finallyLoc);
+	            }
+
+	          } else if (hasCatch) {
+	            if (this.prev < entry.catchLoc) {
+	              return handle(entry.catchLoc, true);
+	            }
+
+	          } else if (hasFinally) {
+	            if (this.prev < entry.finallyLoc) {
+	              return handle(entry.finallyLoc);
+	            }
+
+	          } else {
+	            throw new Error("try statement without catch or finally");
+	          }
+	        }
+	      }
+	    },
+
+	    abrupt: function(type, arg) {
+	      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+	        var entry = this.tryEntries[i];
+	        if (entry.tryLoc <= this.prev &&
+	            hasOwn.call(entry, "finallyLoc") &&
+	            this.prev < entry.finallyLoc) {
+	          var finallyEntry = entry;
+	          break;
+	        }
+	      }
+
+	      if (finallyEntry &&
+	          (type === "break" ||
+	           type === "continue") &&
+	          finallyEntry.tryLoc <= arg &&
+	          arg <= finallyEntry.finallyLoc) {
+	        // Ignore the finally entry if control is not jumping to a
+	        // location outside the try/catch block.
+	        finallyEntry = null;
+	      }
+
+	      var record = finallyEntry ? finallyEntry.completion : {};
+	      record.type = type;
+	      record.arg = arg;
+
+	      if (finallyEntry) {
+	        this.next = finallyEntry.finallyLoc;
+	      } else {
+	        this.complete(record);
+	      }
+
+	      return ContinueSentinel;
+	    },
+
+	    complete: function(record, afterLoc) {
+	      if (record.type === "throw") {
+	        throw record.arg;
+	      }
+
+	      if (record.type === "break" ||
+	          record.type === "continue") {
+	        this.next = record.arg;
+	      } else if (record.type === "return") {
+	        this.rval = record.arg;
+	        this.next = "end";
+	      } else if (record.type === "normal" && afterLoc) {
+	        this.next = afterLoc;
+	      }
+	    },
+
+	    finish: function(finallyLoc) {
+	      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+	        var entry = this.tryEntries[i];
+	        if (entry.finallyLoc === finallyLoc) {
+	          this.complete(entry.completion, entry.afterLoc);
+	          resetTryEntry(entry);
+	          return ContinueSentinel;
+	        }
+	      }
+	    },
+
+	    "catch": function(tryLoc) {
+	      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+	        var entry = this.tryEntries[i];
+	        if (entry.tryLoc === tryLoc) {
+	          var record = entry.completion;
+	          if (record.type === "throw") {
+	            var thrown = record.arg;
+	            resetTryEntry(entry);
+	          }
+	          return thrown;
+	        }
+	      }
+
+	      // The context.catch method must only be called with a location
+	      // argument that corresponds to a known catch block.
+	      throw new Error("illegal catch attempt");
+	    },
+
+	    delegateYield: function(iterable, resultName, nextLoc) {
+	      this.delegate = {
+	        iterator: values(iterable),
+	        resultName: resultName,
+	        nextLoc: nextLoc
+	      };
+
+	      return ContinueSentinel;
+	    }
+	  };
+	})(
+	  // Among the various tricks for obtaining a reference to the global
+	  // object, this seems to be the most reliable technique that does not
+	  // use indirect eval (which violates Content Security Policy).
+	  typeof global === "object" ? global :
+	  typeof window === "object" ? window :
+	  typeof self === "object" ? self : this
+	);
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(134)))
+
+/***/ },
+/* 134 */
+/***/ function(module, exports) {
+
+	// shim for using process in browser
+	var process = module.exports = {};
+
+	// cached from whatever global is present so that test runners that stub it
+	// don't break things.  But we need to wrap it in a try catch in case it is
+	// wrapped in strict mode code which doesn't define any globals.  It's inside a
+	// function because try/catches deoptimize in certain engines.
+
+	var cachedSetTimeout;
+	var cachedClearTimeout;
+
+	function defaultSetTimout() {
+	    throw new Error('setTimeout has not been defined');
+	}
+	function defaultClearTimeout () {
+	    throw new Error('clearTimeout has not been defined');
+	}
+	(function () {
+	    try {
+	        if (typeof setTimeout === 'function') {
+	            cachedSetTimeout = setTimeout;
+	        } else {
+	            cachedSetTimeout = defaultSetTimout;
+	        }
+	    } catch (e) {
+	        cachedSetTimeout = defaultSetTimout;
+	    }
+	    try {
+	        if (typeof clearTimeout === 'function') {
+	            cachedClearTimeout = clearTimeout;
+	        } else {
+	            cachedClearTimeout = defaultClearTimeout;
+	        }
+	    } catch (e) {
+	        cachedClearTimeout = defaultClearTimeout;
+	    }
+	} ())
+	function runTimeout(fun) {
+	    if (cachedSetTimeout === setTimeout) {
+	        //normal enviroments in sane situations
+	        return setTimeout(fun, 0);
+	    }
+	    // if setTimeout wasn't available but was latter defined
+	    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+	        cachedSetTimeout = setTimeout;
+	        return setTimeout(fun, 0);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedSetTimeout(fun, 0);
+	    } catch(e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+	            return cachedSetTimeout.call(null, fun, 0);
+	        } catch(e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+	            return cachedSetTimeout.call(this, fun, 0);
+	        }
+	    }
+
+
+	}
+	function runClearTimeout(marker) {
+	    if (cachedClearTimeout === clearTimeout) {
+	        //normal enviroments in sane situations
+	        return clearTimeout(marker);
+	    }
+	    // if clearTimeout wasn't available but was latter defined
+	    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+	        cachedClearTimeout = clearTimeout;
+	        return clearTimeout(marker);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedClearTimeout(marker);
+	    } catch (e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+	            return cachedClearTimeout.call(null, marker);
+	        } catch (e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+	            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+	            return cachedClearTimeout.call(this, marker);
+	        }
+	    }
+
+
+
+	}
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = runTimeout(cleanUpNextTick);
+	    draining = true;
+
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    runClearTimeout(timeout);
+	}
+
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        runTimeout(drainQueue);
+	    }
+	};
+
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+
+	function noop() {}
+
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function() { return 0; };
+
+
+/***/ },
+/* 135 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	exports.__esModule = true;
+
+	var _promise = __webpack_require__(115);
+
+	var _promise2 = _interopRequireDefault(_promise);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = function (fn) {
+	  return function () {
+	    var gen = fn.apply(this, arguments);
+	    return new _promise2.default(function (resolve, reject) {
+	      function step(key, arg) {
+	        try {
+	          var info = gen[key](arg);
+	          var value = info.value;
+	        } catch (error) {
+	          reject(error);
+	          return;
+	        }
+
+	        if (info.done) {
+	          resolve(value);
+	        } else {
+	          return _promise2.default.resolve(value).then(function (value) {
+	            step("next", value);
+	          }, function (err) {
+	            step("throw", err);
+	          });
+	        }
+	      }
+
+	      return step("next");
+	    });
+	  };
+	};
+
+/***/ },
+/* 136 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = undefined;
+
+	var _promise = __webpack_require__(115);
+
+	var _promise2 = _interopRequireDefault(_promise);
+
+	var _classCallCheck2 = __webpack_require__(75);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(76);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _lodash = __webpack_require__(137);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	var _chunkNoiseViewer = __webpack_require__(139);
+
+	var _chunkNoiseViewer2 = _interopRequireDefault(_chunkNoiseViewer);
+
+	var _noisejs = __webpack_require__(145);
+
+	var _config = __webpack_require__(146);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _utils = __webpack_require__(147);
+
+	var _utils2 = _interopRequireDefault(_utils);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var ChunkNoiseWorker = __webpack_require__(148);
+	var chankId = 0;
+
+	var Chunk = function () {
+	  function Chunk(seed, options) {
+	    (0, _classCallCheck3.default)(this, Chunk);
+	    this.cb = null;
+	    this.cubeNoiseCache = {};
+
+	    this.id = chankId;
+	    chankId++;
+	    this.seed = seed;
+	    this.cfg = _lodash2.default.merge(this.defaultOptions, options);
+	    this.helperNoise1 = new _chunkNoiseViewer2.default({
+	      left: 0,
+	      top: 0
+	    });
+	    this.helperNoise2 = new _chunkNoiseViewer2.default({
+	      right: 0,
+	      top: 0
+	    });
+	  }
+
+	  (0, _createClass3.default)(Chunk, [{
+	    key: 'generateNoise',
+	    value: function generateNoise(location) {
+	      var _this = this;
+
+	      return new _promise2.default(function (resolve) {
+	        var worker = new ChunkNoiseWorker();
+	        worker.postMessage({
+	          seed: _this.seed,
+	          chunkLocation: location,
+	          chunkSize: _config2.default.chunkSize,
+	          mod: 30
+	        });
+	        worker.onmessage = function (e) {
+	          _this.cubeNoiseCache = e.data;
+	          resolve();
+	        };
+	      });
+	    }
+
+	    /**
+	     * Generate chunk,
+	     * @param cb
+	     */
+
+	  }, {
+	    key: 'generateChunk',
+	    value: function generateChunk(location, cb) {
+	      var _this2 = this;
+
+	      return new _promise2.default(function (resolve) {
+	        _this2.generateNoise(location).then(function () {
+	          _this2.cb = cb;
+	          for (var p in _this2.cubeNoiseCache) {
+	            cb(_this2.cubeNoiseCache[p].location.x, _this2.cubeNoiseCache[p].location.y, _this2.cubeNoiseCache[p].location.z, _this2.cubeNoiseCache[p].surrounding);
+	          }
+	          _this2.helperNoise1.end();
+	          _this2.helperNoise2.end();
+	          resolve();
+	        });
+	      });
+	    }
+	  }]);
+	  return Chunk;
+	}();
+
+	exports.default = Chunk;
+
+/***/ },
+/* 137 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -38725,10 +40588,10 @@
 	  }
 	}.call(this));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(128)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(138)(module)))
 
 /***/ },
-/* 128 */
+/* 138 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -38744,7 +40607,7 @@
 
 
 /***/ },
-/* 129 */
+/* 139 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38754,7 +40617,7 @@
 	});
 	exports.default = undefined;
 
-	var _keys = __webpack_require__(130);
+	var _keys = __webpack_require__(140);
 
 	var _keys2 = _interopRequireDefault(_keys);
 
@@ -38770,7 +40633,7 @@
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	var _bluebird = __webpack_require__(133);
+	var _bluebird = __webpack_require__(143);
 
 	var _bluebird2 = _interopRequireDefault(_bluebird);
 
@@ -38921,7 +40784,6 @@
 	      var _this2 = this;
 
 	      _bluebird2.default.all(this.threads).then(function () {
-	        console.error('------- end ! -------');
 	        // adjust canvas size
 	        var size = Math.round(Math.pow(_this2.points.length, 1 / 3)) * _this2.recSize;
 	        _this2.$canvas[0].width = size;
@@ -38934,10 +40796,8 @@
 	    value: function draw() {
 	      var _this3 = this;
 
-	      console.warn('draw mode: ' + this.mode);
 	      this.points.forEach(function (point) {
 	        _this3.rect(point[_this3.modeTypes[_this3.mode][0]], point[_this3.modeTypes[_this3.mode][1]], point.noise);
-	        // this.rect(point.x, point.y, point.noise);
 	      });
 	    }
 	  }, {
@@ -38953,20 +40813,20 @@
 	exports.default = ChunkNoiseViewer;
 
 /***/ },
-/* 130 */
+/* 140 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(131), __esModule: true };
+	module.exports = { "default": __webpack_require__(141), __esModule: true };
 
 /***/ },
-/* 131 */
+/* 141 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(132);
+	__webpack_require__(142);
 	module.exports = __webpack_require__(7).Object.keys;
 
 /***/ },
-/* 132 */
+/* 142 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 19.1.2.14 Object.keys(O)
@@ -38980,7 +40840,7 @@
 	});
 
 /***/ },
-/* 133 */
+/* 143 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process, global, setImmediate) {/* @preserve
@@ -44581,196 +46441,10 @@
 
 	},{"./es5":13}]},{},[4])(4)
 	});                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(134), (function() { return this; }()), __webpack_require__(135).setImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(134), (function() { return this; }()), __webpack_require__(144).setImmediate))
 
 /***/ },
-/* 134 */
-/***/ function(module, exports) {
-
-	// shim for using process in browser
-	var process = module.exports = {};
-
-	// cached from whatever global is present so that test runners that stub it
-	// don't break things.  But we need to wrap it in a try catch in case it is
-	// wrapped in strict mode code which doesn't define any globals.  It's inside a
-	// function because try/catches deoptimize in certain engines.
-
-	var cachedSetTimeout;
-	var cachedClearTimeout;
-
-	function defaultSetTimout() {
-	    throw new Error('setTimeout has not been defined');
-	}
-	function defaultClearTimeout () {
-	    throw new Error('clearTimeout has not been defined');
-	}
-	(function () {
-	    try {
-	        if (typeof setTimeout === 'function') {
-	            cachedSetTimeout = setTimeout;
-	        } else {
-	            cachedSetTimeout = defaultSetTimout;
-	        }
-	    } catch (e) {
-	        cachedSetTimeout = defaultSetTimout;
-	    }
-	    try {
-	        if (typeof clearTimeout === 'function') {
-	            cachedClearTimeout = clearTimeout;
-	        } else {
-	            cachedClearTimeout = defaultClearTimeout;
-	        }
-	    } catch (e) {
-	        cachedClearTimeout = defaultClearTimeout;
-	    }
-	} ())
-	function runTimeout(fun) {
-	    if (cachedSetTimeout === setTimeout) {
-	        //normal enviroments in sane situations
-	        return setTimeout(fun, 0);
-	    }
-	    // if setTimeout wasn't available but was latter defined
-	    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-	        cachedSetTimeout = setTimeout;
-	        return setTimeout(fun, 0);
-	    }
-	    try {
-	        // when when somebody has screwed with setTimeout but no I.E. maddness
-	        return cachedSetTimeout(fun, 0);
-	    } catch(e){
-	        try {
-	            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-	            return cachedSetTimeout.call(null, fun, 0);
-	        } catch(e){
-	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-	            return cachedSetTimeout.call(this, fun, 0);
-	        }
-	    }
-
-
-	}
-	function runClearTimeout(marker) {
-	    if (cachedClearTimeout === clearTimeout) {
-	        //normal enviroments in sane situations
-	        return clearTimeout(marker);
-	    }
-	    // if clearTimeout wasn't available but was latter defined
-	    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-	        cachedClearTimeout = clearTimeout;
-	        return clearTimeout(marker);
-	    }
-	    try {
-	        // when when somebody has screwed with setTimeout but no I.E. maddness
-	        return cachedClearTimeout(marker);
-	    } catch (e){
-	        try {
-	            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-	            return cachedClearTimeout.call(null, marker);
-	        } catch (e){
-	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-	            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-	            return cachedClearTimeout.call(this, marker);
-	        }
-	    }
-
-
-
-	}
-	var queue = [];
-	var draining = false;
-	var currentQueue;
-	var queueIndex = -1;
-
-	function cleanUpNextTick() {
-	    if (!draining || !currentQueue) {
-	        return;
-	    }
-	    draining = false;
-	    if (currentQueue.length) {
-	        queue = currentQueue.concat(queue);
-	    } else {
-	        queueIndex = -1;
-	    }
-	    if (queue.length) {
-	        drainQueue();
-	    }
-	}
-
-	function drainQueue() {
-	    if (draining) {
-	        return;
-	    }
-	    var timeout = runTimeout(cleanUpNextTick);
-	    draining = true;
-
-	    var len = queue.length;
-	    while(len) {
-	        currentQueue = queue;
-	        queue = [];
-	        while (++queueIndex < len) {
-	            if (currentQueue) {
-	                currentQueue[queueIndex].run();
-	            }
-	        }
-	        queueIndex = -1;
-	        len = queue.length;
-	    }
-	    currentQueue = null;
-	    draining = false;
-	    runClearTimeout(timeout);
-	}
-
-	process.nextTick = function (fun) {
-	    var args = new Array(arguments.length - 1);
-	    if (arguments.length > 1) {
-	        for (var i = 1; i < arguments.length; i++) {
-	            args[i - 1] = arguments[i];
-	        }
-	    }
-	    queue.push(new Item(fun, args));
-	    if (queue.length === 1 && !draining) {
-	        runTimeout(drainQueue);
-	    }
-	};
-
-	// v8 likes predictible objects
-	function Item(fun, array) {
-	    this.fun = fun;
-	    this.array = array;
-	}
-	Item.prototype.run = function () {
-	    this.fun.apply(null, this.array);
-	};
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-	process.version = ''; // empty string to avoid regexp issues
-	process.versions = {};
-
-	function noop() {}
-
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
-
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
-
-	process.cwd = function () { return '/' };
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-	process.umask = function() { return 0; };
-
-
-/***/ },
-/* 135 */
+/* 144 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(134).nextTick;
@@ -44849,10 +46523,10 @@
 	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
 	  delete immediateIds[id];
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(135).setImmediate, __webpack_require__(135).clearImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(144).setImmediate, __webpack_require__(144).clearImmediate))
 
 /***/ },
-/* 136 */
+/* 145 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -45185,7 +46859,22 @@
 
 
 /***/ },
-/* 137 */
+/* 146 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  seed: 0,
+	  cubeSize: 20,
+	  chunkSize: 26
+	};
+
+/***/ },
+/* 147 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -45240,791 +46929,12 @@
 	exports.default = Utils;
 
 /***/ },
-/* 138 */
+/* 148 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function() {
-		return new Worker(__webpack_require__.p + "ca394bb6a9fd10b7d112.worker.js");
+		return new Worker(__webpack_require__.p + "65e39c35a46a0d4c753c.worker.js");
 	};
-
-/***/ },
-/* 139 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = undefined;
-
-	var _classCallCheck2 = __webpack_require__(75);
-
-	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-	var _createClass2 = __webpack_require__(76);
-
-	var _createClass3 = _interopRequireDefault(_createClass2);
-
-	var _three = __webpack_require__(77);
-
-	var THREE = _interopRequireWildcard(_three);
-
-	__webpack_require__(140);
-
-	__webpack_require__(141);
-
-	__webpack_require__(108);
-
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var defaults = {
-	  rotation: {
-	    x: 0, y: 0, z: 0
-	  },
-	  position: {
-	    x: 600, y: 300, z: -200
-	  }
-	};
-
-	var Plane = function () {
-	  function Plane(app, gui, params) {
-	    (0, _classCallCheck3.default)(this, Plane);
-
-	    this.app = app;
-	    this.gui = gui;
-	    this.params = params;
-	    this.clock = new THREE.Clock();
-	    this.createCamera();
-	    this.setDefaults();
-	    this.createControls();
-	    this.update();
-	    return this.camera;
-	  }
-
-	  (0, _createClass3.default)(Plane, [{
-	    key: 'createCamera',
-	    value: function createCamera() {
-	      this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-	      this.app.registerUpdate(this.update.bind(this));
-	    }
-	  }, {
-	    key: 'createControls',
-	    value: function createControls() {
-	      this.controls = new THREE.FirstPersonControls(this.camera);
-	      this.controls.movementSpeed = 120;
-	      this.controls.lookSpeed = 0.08;
-	      this.controls.lon = -210;
-	      this.controls.lat = -20;
-	      this.controls.enabled = true;
-	    }
-	  }, {
-	    key: 'setDefaults',
-	    value: function setDefaults() {
-	      this.camera.position.x = defaults.position.x;
-	      this.camera.position.y = defaults.position.y;
-	      this.camera.position.z = defaults.position.z;
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update() {
-	      this.controls.update(this.clock.getDelta());
-	    }
-	  }]);
-	  return Plane;
-	}();
-
-	exports.default = Plane;
-
-/***/ },
-/* 140 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _create = __webpack_require__(91);
-
-	var _create2 = _interopRequireDefault(_create);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	/**
-	 * @author Eberhard Graether / http://egraether.com/
-	 * @author Mark Lundin 	/ http://mark-lundin.com
-	 * @author Simone Manini / http://daron1337.github.io
-	 * @author Luca Antiga 	/ http://lantiga.github.io
-	 */
-	var THREE = __webpack_require__(77);
-
-	THREE.TrackballControls = function (object, domElement) {
-
-	    var _this = this;
-	    var STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2, TOUCH_ROTATE: 3, TOUCH_ZOOM_PAN: 4 };
-
-	    this.object = object;
-	    this.domElement = domElement !== undefined ? domElement : document;
-
-	    // API
-
-	    this.enabled = true;
-
-	    this.screen = { left: 0, top: 0, width: 0, height: 0 };
-
-	    this.rotateSpeed = 1.0;
-	    this.zoomSpeed = 1.2;
-	    this.panSpeed = 0.3;
-
-	    this.noRotate = false;
-	    this.noZoom = false;
-	    this.noPan = false;
-
-	    this.staticMoving = false;
-	    this.dynamicDampingFactor = 0.2;
-
-	    this.minDistance = 0;
-	    this.maxDistance = Infinity;
-
-	    this.keys = [65 /*A*/, 83 /*S*/, 68 /*D*/];
-
-	    // internals
-
-	    this.target = new THREE.Vector3();
-
-	    var EPS = 0.000001;
-
-	    var lastPosition = new THREE.Vector3();
-
-	    var _state = STATE.NONE,
-	        _prevState = STATE.NONE,
-	        _eye = new THREE.Vector3(),
-	        _movePrev = new THREE.Vector2(),
-	        _moveCurr = new THREE.Vector2(),
-	        _lastAxis = new THREE.Vector3(),
-	        _lastAngle = 0,
-	        _zoomStart = new THREE.Vector2(),
-	        _zoomEnd = new THREE.Vector2(),
-	        _touchZoomDistanceStart = 0,
-	        _touchZoomDistanceEnd = 0,
-	        _panStart = new THREE.Vector2(),
-	        _panEnd = new THREE.Vector2();
-
-	    // for reset
-
-	    this.target0 = this.target.clone();
-	    this.position0 = this.object.position.clone();
-	    this.up0 = this.object.up.clone();
-
-	    // events
-
-	    var changeEvent = { type: 'change' };
-	    var startEvent = { type: 'start' };
-	    var endEvent = { type: 'end' };
-
-	    // methods
-
-	    this.handleResize = function () {
-
-	        if (this.domElement === document) {
-
-	            this.screen.left = 0;
-	            this.screen.top = 0;
-	            this.screen.width = window.innerWidth;
-	            this.screen.height = window.innerHeight;
-	        } else {
-
-	            var box = this.domElement.getBoundingClientRect();
-	            // adjustments come from similar code in the jquery offset() function
-	            var d = this.domElement.ownerDocument.documentElement;
-	            this.screen.left = box.left + window.pageXOffset - d.clientLeft;
-	            this.screen.top = box.top + window.pageYOffset - d.clientTop;
-	            this.screen.width = box.width;
-	            this.screen.height = box.height;
-	        }
-	    };
-
-	    this.handleEvent = function (event) {
-
-	        if (typeof this[event.type] == 'function') {
-
-	            this[event.type](event);
-	        }
-	    };
-
-	    var getMouseOnScreen = function () {
-
-	        var vector = new THREE.Vector2();
-
-	        return function getMouseOnScreen(pageX, pageY) {
-
-	            vector.set((pageX - _this.screen.left) / _this.screen.width, (pageY - _this.screen.top) / _this.screen.height);
-
-	            return vector;
-	        };
-	    }();
-
-	    var getMouseOnCircle = function () {
-
-	        var vector = new THREE.Vector2();
-
-	        return function getMouseOnCircle(pageX, pageY) {
-
-	            vector.set((pageX - _this.screen.width * 0.5 - _this.screen.left) / (_this.screen.width * 0.5), (_this.screen.height + 2 * (_this.screen.top - pageY)) / _this.screen.width);
-
-	            return vector;
-	        };
-	    }();
-
-	    this.rotateCamera = function () {
-
-	        var axis = new THREE.Vector3(),
-	            quaternion = new THREE.Quaternion(),
-	            eyeDirection = new THREE.Vector3(),
-	            objectUpDirection = new THREE.Vector3(),
-	            objectSidewaysDirection = new THREE.Vector3(),
-	            moveDirection = new THREE.Vector3(),
-	            angle;
-
-	        return function rotateCamera() {
-
-	            moveDirection.set(_moveCurr.x - _movePrev.x, _moveCurr.y - _movePrev.y, 0);
-	            angle = moveDirection.length();
-
-	            if (angle) {
-
-	                _eye.copy(_this.object.position).sub(_this.target);
-
-	                eyeDirection.copy(_eye).normalize();
-	                objectUpDirection.copy(_this.object.up).normalize();
-	                objectSidewaysDirection.crossVectors(objectUpDirection, eyeDirection).normalize();
-
-	                objectUpDirection.setLength(_moveCurr.y - _movePrev.y);
-	                objectSidewaysDirection.setLength(_moveCurr.x - _movePrev.x);
-
-	                moveDirection.copy(objectUpDirection.add(objectSidewaysDirection));
-
-	                axis.crossVectors(moveDirection, _eye).normalize();
-
-	                angle *= _this.rotateSpeed;
-	                quaternion.setFromAxisAngle(axis, angle);
-
-	                _eye.applyQuaternion(quaternion);
-	                _this.object.up.applyQuaternion(quaternion);
-
-	                _lastAxis.copy(axis);
-	                _lastAngle = angle;
-	            } else if (!_this.staticMoving && _lastAngle) {
-
-	                _lastAngle *= Math.sqrt(1.0 - _this.dynamicDampingFactor);
-	                _eye.copy(_this.object.position).sub(_this.target);
-	                quaternion.setFromAxisAngle(_lastAxis, _lastAngle);
-	                _eye.applyQuaternion(quaternion);
-	                _this.object.up.applyQuaternion(quaternion);
-	            }
-
-	            _movePrev.copy(_moveCurr);
-	        };
-	    }();
-
-	    this.zoomCamera = function () {
-
-	        var factor;
-
-	        if (_state === STATE.TOUCH_ZOOM_PAN) {
-
-	            factor = _touchZoomDistanceStart / _touchZoomDistanceEnd;
-	            _touchZoomDistanceStart = _touchZoomDistanceEnd;
-	            _eye.multiplyScalar(factor);
-	        } else {
-
-	            factor = 1.0 + (_zoomEnd.y - _zoomStart.y) * _this.zoomSpeed;
-
-	            if (factor !== 1.0 && factor > 0.0) {
-
-	                _eye.multiplyScalar(factor);
-	            }
-
-	            if (_this.staticMoving) {
-
-	                _zoomStart.copy(_zoomEnd);
-	            } else {
-
-	                _zoomStart.y += (_zoomEnd.y - _zoomStart.y) * this.dynamicDampingFactor;
-	            }
-	        }
-	    };
-
-	    this.panCamera = function () {
-
-	        var mouseChange = new THREE.Vector2(),
-	            objectUp = new THREE.Vector3(),
-	            pan = new THREE.Vector3();
-
-	        return function panCamera() {
-
-	            mouseChange.copy(_panEnd).sub(_panStart);
-
-	            if (mouseChange.lengthSq()) {
-
-	                mouseChange.multiplyScalar(_eye.length() * _this.panSpeed);
-
-	                pan.copy(_eye).cross(_this.object.up).setLength(mouseChange.x);
-	                pan.add(objectUp.copy(_this.object.up).setLength(mouseChange.y));
-
-	                _this.object.position.add(pan);
-	                _this.target.add(pan);
-
-	                if (_this.staticMoving) {
-
-	                    _panStart.copy(_panEnd);
-	                } else {
-
-	                    _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
-	                }
-	            }
-	        };
-	    }();
-
-	    this.checkDistances = function () {
-
-	        if (!_this.noZoom || !_this.noPan) {
-
-	            if (_eye.lengthSq() > _this.maxDistance * _this.maxDistance) {
-
-	                _this.object.position.addVectors(_this.target, _eye.setLength(_this.maxDistance));
-	                _zoomStart.copy(_zoomEnd);
-	            }
-
-	            if (_eye.lengthSq() < _this.minDistance * _this.minDistance) {
-
-	                _this.object.position.addVectors(_this.target, _eye.setLength(_this.minDistance));
-	                _zoomStart.copy(_zoomEnd);
-	            }
-	        }
-	    };
-
-	    this.update = function () {
-
-	        _eye.subVectors(_this.object.position, _this.target);
-
-	        if (!_this.noRotate) {
-
-	            _this.rotateCamera();
-	        }
-
-	        if (!_this.noZoom) {
-
-	            _this.zoomCamera();
-	        }
-
-	        if (!_this.noPan) {
-
-	            _this.panCamera();
-	        }
-
-	        _this.object.position.addVectors(_this.target, _eye);
-
-	        _this.checkDistances();
-
-	        _this.object.lookAt(_this.target);
-
-	        if (lastPosition.distanceToSquared(_this.object.position) > EPS) {
-
-	            _this.dispatchEvent(changeEvent);
-
-	            lastPosition.copy(_this.object.position);
-	        }
-	    };
-
-	    this.reset = function () {
-
-	        _state = STATE.NONE;
-	        _prevState = STATE.NONE;
-
-	        _this.target.copy(_this.target0);
-	        _this.object.position.copy(_this.position0);
-	        _this.object.up.copy(_this.up0);
-
-	        _eye.subVectors(_this.object.position, _this.target);
-
-	        _this.object.lookAt(_this.target);
-
-	        _this.dispatchEvent(changeEvent);
-
-	        lastPosition.copy(_this.object.position);
-	    };
-
-	    // listeners
-
-	    function keydown(event) {
-
-	        if (_this.enabled === false) return;
-
-	        window.removeEventListener('keydown', keydown);
-
-	        _prevState = _state;
-
-	        if (_state !== STATE.NONE) {
-
-	            return;
-	        } else if (event.keyCode === _this.keys[STATE.ROTATE] && !_this.noRotate) {
-
-	            _state = STATE.ROTATE;
-	        } else if (event.keyCode === _this.keys[STATE.ZOOM] && !_this.noZoom) {
-
-	            _state = STATE.ZOOM;
-	        } else if (event.keyCode === _this.keys[STATE.PAN] && !_this.noPan) {
-
-	            _state = STATE.PAN;
-	        }
-	    }
-
-	    function keyup(event) {
-
-	        if (_this.enabled === false) return;
-
-	        _state = _prevState;
-
-	        window.addEventListener('keydown', keydown, false);
-	    }
-
-	    function mousedown(event) {
-
-	        if (_this.enabled === false) return;
-
-	        event.preventDefault();
-	        event.stopPropagation();
-
-	        if (_state === STATE.NONE) {
-
-	            _state = event.button;
-	        }
-
-	        if (_state === STATE.ROTATE && !_this.noRotate) {
-
-	            _moveCurr.copy(getMouseOnCircle(event.pageX, event.pageY));
-	            _movePrev.copy(_moveCurr);
-	        } else if (_state === STATE.ZOOM && !_this.noZoom) {
-
-	            _zoomStart.copy(getMouseOnScreen(event.pageX, event.pageY));
-	            _zoomEnd.copy(_zoomStart);
-	        } else if (_state === STATE.PAN && !_this.noPan) {
-
-	            _panStart.copy(getMouseOnScreen(event.pageX, event.pageY));
-	            _panEnd.copy(_panStart);
-	        }
-
-	        document.addEventListener('mousemove', mousemove, false);
-	        document.addEventListener('mouseup', mouseup, false);
-
-	        _this.dispatchEvent(startEvent);
-	    }
-
-	    function mousemove(event) {
-
-	        if (_this.enabled === false) return;
-
-	        event.preventDefault();
-	        event.stopPropagation();
-
-	        if (_state === STATE.ROTATE && !_this.noRotate) {
-
-	            _movePrev.copy(_moveCurr);
-	            _moveCurr.copy(getMouseOnCircle(event.pageX, event.pageY));
-	        } else if (_state === STATE.ZOOM && !_this.noZoom) {
-
-	            _zoomEnd.copy(getMouseOnScreen(event.pageX, event.pageY));
-	        } else if (_state === STATE.PAN && !_this.noPan) {
-
-	            _panEnd.copy(getMouseOnScreen(event.pageX, event.pageY));
-	        }
-	    }
-
-	    function mouseup(event) {
-
-	        if (_this.enabled === false) return;
-
-	        event.preventDefault();
-	        event.stopPropagation();
-
-	        _state = STATE.NONE;
-
-	        document.removeEventListener('mousemove', mousemove);
-	        document.removeEventListener('mouseup', mouseup);
-	        _this.dispatchEvent(endEvent);
-	    }
-
-	    function mousewheel(event) {
-
-	        if (_this.enabled === false) return;
-
-	        event.preventDefault();
-	        event.stopPropagation();
-
-	        _zoomStart.y -= event.deltaY * 0.01;
-
-	        _this.dispatchEvent(startEvent);
-	        _this.dispatchEvent(endEvent);
-	    }
-
-	    function touchstart(event) {
-
-	        if (_this.enabled === false) return;
-
-	        switch (event.touches.length) {
-
-	            case 1:
-	                _state = STATE.TOUCH_ROTATE;
-	                _moveCurr.copy(getMouseOnCircle(event.touches[0].pageX, event.touches[0].pageY));
-	                _movePrev.copy(_moveCurr);
-	                break;
-
-	            default:
-	                // 2 or more
-	                _state = STATE.TOUCH_ZOOM_PAN;
-	                var dx = event.touches[0].pageX - event.touches[1].pageX;
-	                var dy = event.touches[0].pageY - event.touches[1].pageY;
-	                _touchZoomDistanceEnd = _touchZoomDistanceStart = Math.sqrt(dx * dx + dy * dy);
-
-	                var x = (event.touches[0].pageX + event.touches[1].pageX) / 2;
-	                var y = (event.touches[0].pageY + event.touches[1].pageY) / 2;
-	                _panStart.copy(getMouseOnScreen(x, y));
-	                _panEnd.copy(_panStart);
-	                break;
-
-	        }
-
-	        _this.dispatchEvent(startEvent);
-	    }
-
-	    function touchmove(event) {
-
-	        if (_this.enabled === false) return;
-
-	        event.preventDefault();
-	        event.stopPropagation();
-
-	        switch (event.touches.length) {
-
-	            case 1:
-	                _movePrev.copy(_moveCurr);
-	                _moveCurr.copy(getMouseOnCircle(event.touches[0].pageX, event.touches[0].pageY));
-	                break;
-
-	            default:
-	                // 2 or more
-	                var dx = event.touches[0].pageX - event.touches[1].pageX;
-	                var dy = event.touches[0].pageY - event.touches[1].pageY;
-	                _touchZoomDistanceEnd = Math.sqrt(dx * dx + dy * dy);
-
-	                var x = (event.touches[0].pageX + event.touches[1].pageX) / 2;
-	                var y = (event.touches[0].pageY + event.touches[1].pageY) / 2;
-	                _panEnd.copy(getMouseOnScreen(x, y));
-	                break;
-
-	        }
-	    }
-
-	    function touchend(event) {
-
-	        if (_this.enabled === false) return;
-
-	        switch (event.touches.length) {
-
-	            case 0:
-	                _state = STATE.NONE;
-	                break;
-
-	            case 1:
-	                _state = STATE.TOUCH_ROTATE;
-	                _moveCurr.copy(getMouseOnCircle(event.touches[0].pageX, event.touches[0].pageY));
-	                _movePrev.copy(_moveCurr);
-	                break;
-
-	        }
-
-	        _this.dispatchEvent(endEvent);
-	    }
-
-	    function contextmenu(event) {
-
-	        event.preventDefault();
-	    }
-
-	    this.dispose = function () {
-
-	        this.domElement.removeEventListener('contextmenu', contextmenu, false);
-	        this.domElement.removeEventListener('mousedown', mousedown, false);
-	        this.domElement.removeEventListener('wheel', mousewheel, false);
-
-	        this.domElement.removeEventListener('touchstart', touchstart, false);
-	        this.domElement.removeEventListener('touchend', touchend, false);
-	        this.domElement.removeEventListener('touchmove', touchmove, false);
-
-	        document.removeEventListener('mousemove', mousemove, false);
-	        document.removeEventListener('mouseup', mouseup, false);
-
-	        window.removeEventListener('keydown', keydown, false);
-	        window.removeEventListener('keyup', keyup, false);
-	    };
-
-	    this.domElement.addEventListener('contextmenu', contextmenu, false);
-	    this.domElement.addEventListener('mousedown', mousedown, false);
-	    this.domElement.addEventListener('wheel', mousewheel, false);
-
-	    this.domElement.addEventListener('touchstart', touchstart, false);
-	    this.domElement.addEventListener('touchend', touchend, false);
-	    this.domElement.addEventListener('touchmove', touchmove, false);
-
-	    window.addEventListener('keydown', keydown, false);
-	    window.addEventListener('keyup', keyup, false);
-
-	    this.handleResize();
-
-	    // force an update at start
-	    this.update();
-	};
-
-	THREE.TrackballControls.prototype = (0, _create2.default)(THREE.EventDispatcher.prototype);
-	THREE.TrackballControls.prototype.constructor = THREE.TrackballControls;
-
-/***/ },
-/* 141 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _three = __webpack_require__(77);
-
-	var THREE = _interopRequireWildcard(_three);
-
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-	THREE.PointerLockControls = function (camera) {
-
-	  var scope = this;
-
-	  camera.rotation.set(0, 0, 0);
-
-	  var pitchObject = new THREE.Object3D();
-	  pitchObject.add(camera);
-
-	  var yawObject = new THREE.Object3D();
-	  yawObject.position.y = 10;
-	  yawObject.add(pitchObject);
-
-	  var PI_2 = Math.PI / 2;
-
-	  var onMouseMove = function onMouseMove(event) {
-
-	    if (scope.enabled === false) return;
-
-	    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-	    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-
-	    yawObject.rotation.y -= movementX * 0.002;
-	    pitchObject.rotation.x -= movementY * 0.002;
-
-	    pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
-	  };
-
-	  this.dispose = function () {
-
-	    document.removeEventListener('mousemove', onMouseMove, false);
-	  };
-
-	  document.addEventListener('mousemove', onMouseMove, false);
-
-	  this.enabled = false;
-
-	  this.getObject = function () {
-
-	    return yawObject;
-	  };
-
-	  this.getDirection = function () {
-
-	    // assumes the camera itself is not rotated
-
-	    var direction = new THREE.Vector3(0, 0, -1);
-	    var rotation = new THREE.Euler(0, 0, 0, "YXZ");
-
-	    return function (v) {
-
-	      rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
-
-	      v.copy(direction).applyEuler(rotation);
-
-	      return v;
-	    };
-	  }();
-	}; /**
-	    * @author mrdoob / http://mrdoob.com/
-	    */
-
-/***/ },
-/* 142 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = undefined;
-
-	var _classCallCheck2 = __webpack_require__(75);
-
-	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-	var _createClass2 = __webpack_require__(76);
-
-	var _createClass3 = _interopRequireDefault(_createClass2);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var instances = {};
-
-	var _Perf = function () {
-	  function _Perf(name) {
-	    (0, _classCallCheck3.default)(this, _Perf);
-
-	    this.name = name;
-	    this.timeStart = new Date().getTime();
-	  }
-
-	  (0, _createClass3.default)(_Perf, [{
-	    key: 'end',
-	    value: function end() {
-	      this.timeEnd = new Date().getTime();
-	      console.warn(this.name);
-
-	      console.log((this.timeEnd - this.timeStart) / 1000 + 's');
-	    }
-	  }]);
-	  return _Perf;
-	}();
-
-	var Perf = function () {
-	  function Perf(name) {
-	    (0, _classCallCheck3.default)(this, Perf);
-	  }
-
-	  (0, _createClass3.default)(Perf, null, [{
-	    key: 'get',
-	    value: function get(name) {
-	      if (typeof instances[name] === 'undefined') {
-	        instances[name] = new _Perf();
-	      }
-
-	      return instances[name];
-	    }
-	  }]);
-	  return Perf;
-	}();
-
-	exports.default = Perf;
 
 /***/ }
 /******/ ]);

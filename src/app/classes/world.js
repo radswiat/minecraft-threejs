@@ -6,7 +6,7 @@ import {
 import Chunk from '../func/chunk';
 import config from '../config';
 import Perf from '../utils/perf';
-import $ from 'jquery';
+import Message from '../utils/message';
 
 export default class World {
 
@@ -14,27 +14,26 @@ export default class World {
     this.seed = config.seed;
     this.chunk = new Chunk(this.seed);
     this.app = app;
+    this.message = new Message(['Loading', '0', 'of', '49', 'It can be a bit slow before finishing :)']);
     this.generateChunks();
   }
 
   async generateChunks() {
-
-    let $msg = $('<div id="msg_warning">Loading <span class="current">1</span> of <span>50</span> chunks ...<br>It can be a bit slow before finishing :)</div>');
-    $('body').append($msg);
-
-    var chanks = 6;
-    for(let x = 0; x <= chanks; x++) {
-      for(let y = 0; y <= chanks; y++) {
+    var chunks = 6;
+    for(let x = 0; x <= chunks; x++) {
+      for(let y = 0; y <= chunks; y++) {
+        Perf.get(`Chunk ${x}${y} gen`);
         await this.generateChunk({ x, y });
-        let $current = $msg.find('span.current');
-        $current.html(parseInt($current.html()) + 1);
+        this.message.increase(1);
+        Perf.get(`Chunk ${x}${y} gen`).end();
       }
     }
-    $msg.remove();
   }
 
-  generateChunk(location) {
-    return new Promise((resolve) => {
+  async generateChunk(location) {
+    return new Promise( async (resolve) => {
+
+      let stats = { drawn: 0 };
       let chunk = this.chunk;
       let cubeSize = config.cubeSize;
 
@@ -67,8 +66,7 @@ export default class World {
       var nyTmpGeometry = new Geometry().fromBufferGeometry( nyGeometry );
 
       // generate chunk
-      let stats = { drawn: 0 };
-      chunk.generateChunk(location, (x, y, z, surrounding) => {
+      await chunk.generateChunk(location, (x, y, z, surrounding) => {
 
         stats.drawn++;
         matrix.makeTranslation(x * cubeSize, y * cubeSize, z * cubeSize);
@@ -81,18 +79,16 @@ export default class World {
         if( !surrounding.nz ) { tmpGeometry.merge( nzTmpGeometry, matrix ); }
         if( !surrounding.ny ) { tmpGeometry.merge( nyTmpGeometry, matrix ); }
 
-      }).then(() => {
-        var geometry = new BufferGeometry().fromGeometry( tmpGeometry );
-        geometry.computeBoundingSphere();
-        var texture = new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" );
-        var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) ); // , side: DoubleSide
-        this.app.scene.add( mesh );
-        Perf.get('PERF_start_end').end();
-        resolve();
-      })
-    })
+      });
 
 
+      var geometry = new BufferGeometry().fromGeometry( tmpGeometry );
+      geometry.computeBoundingSphere();
+      var texture = new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" );
+      var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) );
+      this.app.scene.add( mesh );
 
+      resolve();
+    });
   }
 }
