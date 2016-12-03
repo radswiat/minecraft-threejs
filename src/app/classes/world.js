@@ -14,14 +14,14 @@ export default class World {
     this.seed = config.seed;
     this.chunk = new Chunk(this.seed);
     this.app = app;
-    this.message = new Message(['Loading', '0', 'of', '49', 'It can be a bit slow before finishing :)']);
+    this.message = new Message(['Loading', '0', 'of', '64', 'It can be a bit slow before finishing :)']);
     this.generateChunks();
   }
 
   async generateChunks() {
-    var chunks = 6;
-    for(let x = 0; x <= chunks; x++) {
-      for(let y = 0; y <= chunks; y++) {
+    var chunks = 4;
+    for(let x = -3; x <= chunks; x++) {
+      for(let y = -3; y <= chunks; y++) {
         Perf.get(`Chunk ${x}${y} gen`);
         await this.generateChunk({ x, y });
         this.message.increase(1);
