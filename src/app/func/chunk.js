@@ -36,12 +36,7 @@ export default class Chunk {
       await this.generateNoise(location);
       this.cb = cb;
       for (let p in this.cubeNoiseCache) {
-        cb(
-          this.cubeNoiseCache[p].location.x,
-          this.cubeNoiseCache[p].location.y,
-          this.cubeNoiseCache[p].location.z,
-          this.cubeNoiseCache[p].surrounding,
-        );
+        cb(this.cubeNoiseCache[p]);
       }
       resolve();
     });

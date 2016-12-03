@@ -1,4 +1,5 @@
 import {Noise} from 'noisejs';
+import Utils from '../utils';
 self.addEventListener('message', function(e) {
   let seed = e.data.seed;
   let chunkSize = e.data.chunkSize;
@@ -33,7 +34,7 @@ self.addEventListener('message', function(e) {
     let noiseValue = noise.perlin3(x / mod, y / mod, z / mod);
     // return noiseValue;
     // noiseValue = ( noiseValue / 2 ) / y;
-    noiseValue += ( 10 - y ) / 10; // ( 5 / z ) / 10
+    noiseValue += ( 8 - y ) / 10; // ( 5 / z ) / 10
     return noiseValue;
   };
 
@@ -75,12 +76,26 @@ self.addEventListener('message', function(e) {
             nz : getSurrounding(tx, ty, tz - 1),
             ny : getSurrounding(tx, ty - 1, tz)
           };
+
+          let material = 0;
+          // dirt on edges
+          // if(surroundingNoiseValues.pz && surroundingNoiseValues.nz) {
+          //   material = 1;
+          // }
+          if( ty > Utils.rnd(10, 12) ) {
+            material = 2;
+          }
+          if( ty < Utils.rnd(1, 4) ) {
+            material = 1;
+          }
+
           chunkNoise[`${tx}_${ty}_${tz}`] = {
             location: {
               x: tx, y: ty, z: tz
             },
             surrounding: surroundingNoiseValues,
-            noiseValue: noiseValue
+            noiseValue: noiseValue,
+            material
           };
         }
       }

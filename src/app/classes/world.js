@@ -1,6 +1,6 @@
 import {
   Geometry, BufferGeometry, PlaneBufferGeometry,
-  Mesh, MeshLambertMaterial, DoubleSide,
+  Mesh, MeshLambertMaterial, MultiMaterial,
   TextureLoader, Matrix4
 } from '../../lib/three';
 import Chunk from '../func/chunk';
@@ -66,26 +66,38 @@ export default class World {
       var nyTmpGeometry = new Geometry().fromBufferGeometry( nyGeometry );
 
       // generate chunk
-      await chunk.generateChunk(location, (x, y, z, surrounding) => {
+      await chunk.generateChunk(location, (cube) => {
 
         stats.drawn++;
-        matrix.makeTranslation(x * cubeSize, y * cubeSize, z * cubeSize);
+        matrix.makeTranslation(cube.location.x * cubeSize, cube.location.y * cubeSize, cube.location.z * cubeSize);
 
         // Check what cube geometry should be drawn
-        if( !surrounding.px ) { tmpGeometry.merge( pxTmpGeometry, matrix ); }
-        if( !surrounding.nx ) { tmpGeometry.merge( nxTmpGeometry, matrix ); }
-        if( !surrounding.py ) { tmpGeometry.merge( pyTmpGeometry, matrix ); }
-        if( !surrounding.pz ) { tmpGeometry.merge( pzTmpGeometry, matrix ); }
-        if( !surrounding.nz ) { tmpGeometry.merge( nzTmpGeometry, matrix ); }
-        if( !surrounding.ny ) { tmpGeometry.merge( nyTmpGeometry, matrix ); }
+        if( !cube.surrounding.px ) { tmpGeometry.merge( pxTmpGeometry, matrix, cube.material ); }
+        if( !cube.surrounding.nx ) { tmpGeometry.merge( nxTmpGeometry, matrix, cube.material ); }
+        if( !cube.surrounding.py ) { tmpGeometry.merge( pyTmpGeometry, matrix, cube.material ); }
+        if( !cube.surrounding.pz ) { tmpGeometry.merge( pzTmpGeometry, matrix, cube.material ); }
+        if( !cube.surrounding.nz ) { tmpGeometry.merge( nzTmpGeometry, matrix, cube.material ); }
+        if( !cube.surrounding.ny ) { tmpGeometry.merge( nyTmpGeometry, matrix, cube.material ); }
 
       });
-
 
       var geometry = new BufferGeometry().fromGeometry( tmpGeometry );
       geometry.computeBoundingSphere();
       var texture = new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" );
-      var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) );
+      var mat1 = new MeshLambertMaterial({
+        map : texture
+      });
+      var texture2 = new TextureLoader().load( "../assets/textures/blocks/dirt.png" );
+      var mat2 = new MeshLambertMaterial({
+        map : texture2
+      });
+      var texture3 = new TextureLoader().load( "../assets/textures/blocks/cobblestone_mossy.png" );
+      var mat3 = new MeshLambertMaterial({
+        map : texture3
+      });
+      // var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) );
+      var mesh = new Mesh( geometry, new MultiMaterial([mat1, mat2, mat3] ) );
+
       this.app.scene.add( mesh );
 
       resolve();

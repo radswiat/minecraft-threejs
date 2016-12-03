@@ -19,4 +19,8 @@ export default class Utils {
     return false;
   }
 
+  static rnd(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
 }
