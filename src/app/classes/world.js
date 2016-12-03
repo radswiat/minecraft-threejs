@@ -83,20 +83,25 @@ export default class World {
 
       var geometry = new BufferGeometry().fromGeometry( tmpGeometry );
       geometry.computeBoundingSphere();
-      var texture = new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" );
-      var mat1 = new MeshLambertMaterial({
-        map : texture
+      var texture0 = new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" );
+      var mat0 = new MeshLambertMaterial({
+        map : texture0
       });
-      var texture2 = new TextureLoader().load( "../assets/textures/blocks/dirt.png" );
+      var texture1 = new TextureLoader().load( "../assets/textures/blocks/dirt.png" );
+      var mat1 = new MeshLambertMaterial({
+        map : texture1
+      });
+      var texture2 = new TextureLoader().load( "../assets/textures/blocks/cobblestone_mossy.png" );
       var mat2 = new MeshLambertMaterial({
         map : texture2
       });
-      var texture3 = new TextureLoader().load( "../assets/textures/blocks/cobblestone_mossy.png" );
+      var texture3 = new TextureLoader().load( "../assets/textures/blocks/log_spruce.png" );
       var mat3 = new MeshLambertMaterial({
         map : texture3
       });
+
       // var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) );
-      var mesh = new Mesh( geometry, new MultiMaterial([mat1, mat2, mat3] ) );
+      var mesh = new Mesh( geometry, new MultiMaterial([mat0, mat1, mat2, mat3] ) );
 
       this.app.scene.add( mesh );
 

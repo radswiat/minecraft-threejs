@@ -101,6 +101,46 @@ self.addEventListener('message', function(e) {
       }
     }
   }
+
+  let chunkTreeChance = Math.round(Utils.rnd(5, 10));
+
+  for(let i = 0; i < Math.round(Utils.rnd(1, 5 * chunkTreeChance)); i++) {
+    // generate trees when we got whole chunk
+    let x = ( chunkLocation.y * chunkSize ) + Math.round(Utils.rnd(-10, 10));
+    let z = ( chunkLocation.x * chunkSize ) + Math.round(Utils.rnd(-10, 10));
+    var found = null;
+    // lets find out where it ends in y ( up/down axis )
+    for(let y = -13; y <= 13; y++) {
+      if(typeof chunkNoise[`${x}_${y}_${z}`] !== 'undefined') {
+        found = ( y + 1 );
+      }
+    }
+
+    if(found) {
+      // three height
+      let treeHeight = Math.round(Utils.rnd(6, 12));
+      for(let y = found; y <= treeHeight; y++ ) {
+        chunkNoise[`${x}_${y}_${z}`] = {
+          location: {
+            x, y, z
+          },
+          surrounding: {
+            px : false,
+            nx : false,
+            py : false,
+            pz : false,
+            nz : false,
+            ny : false
+          },
+          noiseValue: getNoiseFor(x, y, z),
+          material: 3
+        };
+      }
+    }
+  }
+
+
+
   // let noiseValue = data.noise.perlin3(data.x, data.y, data.z);
   self.postMessage(chunkNoise);
 }, false);
