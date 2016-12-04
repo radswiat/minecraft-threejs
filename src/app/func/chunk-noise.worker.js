@@ -102,9 +102,120 @@ self.addEventListener('message', function(e) {
     }
   }
 
-  let chunkTreeChance = Math.round(Utils.rnd(5, 10));
 
-  for(let i = 0; i < Math.round(Utils.rnd(1, 5 * chunkTreeChance)); i++) {
+  /***
+   *
+   *
+   *
+   *
+   * All below for tree generation,
+   * it will be moved somewhere else ...later :)
+   *
+   *
+   *
+   * =====================================================
+   */
+
+
+
+  var drawTreeCube = (x, y, z) => {
+    chunkNoise[`${x}_${y}_${z}`] = {
+      location: {
+        x, y, z
+      },
+      surrounding: {
+        px : false,
+        nx : false,
+        py : false,
+        pz : false,
+        nz : false,
+        ny : false
+      },
+      noiseValue: getNoiseFor(x, y, z),
+      material: 3
+    };
+  };
+
+  var drawLeavesCube = (x, y, z) => {
+    chunkNoise[`${x}_${y}_${z}`] = {
+      location: {
+        x, y, z
+      },
+      surrounding: {
+        px : false,
+        nx : false,
+        py : false,
+        pz : false,
+        nz : false,
+        ny : false
+      },
+      noiseValue: getNoiseFor(x, y, z),
+      material: 4
+    };
+  };
+
+
+  var drawCubeCircle = (location, r) => {
+    var x0 = location.x;
+    var z0 = location.z;
+    var y = location.y;
+    // lest make leaves around
+    var z = 0;
+    var decisionOver2 = 1 - r;
+    while(r >= z) {
+      drawLeavesCube(r + x0, y, z + z0);
+      drawLeavesCube(z + x0, y, r + z0);
+      drawLeavesCube(-r + x0, y, z + z0);
+      drawLeavesCube(-z + x0, y, r + z0);
+      drawLeavesCube(-r + x0, y, -z + z0);
+      drawLeavesCube(-z + x0, y, -r + z0);
+      drawLeavesCube(r + x0, y, -z + z0);
+      drawLeavesCube(z + x0, y, -r + z0);
+      z++;
+      if (decisionOver2 <= 0) {
+        decisionOver2 += 2 * y + 1; // Change in decision criterion for y -> y+1
+      } else {
+        r--;
+        decisionOver2 += 2 * (y - r) + 1;
+      }
+    }
+  };
+
+
+  /**
+   *
+   * @param location
+   */
+  var generateTree = (location) => {
+
+    var currHeight;
+
+    // how much space left?
+    let heightLeft = chunkSize - location.y;
+
+    // won't be able to draw soo tiny tree
+    if( heightLeft < 6 ) { return; }
+
+    // lets draw base, base is always min 4 - 6
+    let mod = 150;
+    let height = Math.round(3 * ( Math.round(Math.abs(
+      noise.simplex3(location.x / mod, location.y / mod, location.z / mod) * 100
+    )) / 10 ) / 2);
+
+    if(height < 3) height = 3;
+
+    for(currHeight = location.y; currHeight <= location.y + height; currHeight++ ) {
+      drawTreeCube(location.x, currHeight,location.z);
+    }
+
+    drawLeavesCube(location.x, currHeight,location.z);
+    drawCubeCircle({x: location.x, y: currHeight - 1, z: location.z}, 1);
+    drawCubeCircle({x: location.x, y: currHeight - 2, z: location.z}, 1);
+    drawCubeCircle({x: location.x, y: currHeight - 2, z: location.z}, 2);
+  };
+console.log(Math.abs(noise.perlin2(Math.abs(chunkLocation.x) / 22, Math.abs(chunkLocation.y) / 22)));
+  let chunkTreeChance = Math.round(Utils.rnd(5, 10));
+  for(let i = 0; i < Math.round(Math.abs(noise.perlin2(Math.abs(chunkLocation.x) / 22, Math.abs(chunkLocation.y) / 22)) * 100); i++) {
     // generate trees when we got whole chunk
     let x = ( chunkLocation.y * chunkSize ) + Math.round(Utils.rnd(-10, 10));
     let z = ( chunkLocation.x * chunkSize ) + Math.round(Utils.rnd(-10, 10));
@@ -117,29 +228,9 @@ self.addEventListener('message', function(e) {
     }
 
     if(found) {
-      // three height
-      let treeHeight = Math.round(Utils.rnd(6, 12));
-      for(let y = found; y <= treeHeight; y++ ) {
-        chunkNoise[`${x}_${y}_${z}`] = {
-          location: {
-            x, y, z
-          },
-          surrounding: {
-            px : false,
-            nx : false,
-            py : false,
-            pz : false,
-            nz : false,
-            ny : false
-          },
-          noiseValue: getNoiseFor(x, y, z),
-          material: 3
-        };
-      }
+      generateTree({x: x, y: found, z: z});
     }
   }
-
-
 
   // let noiseValue = data.noise.perlin3(data.x, data.y, data.z);
   self.postMessage(chunkNoise);

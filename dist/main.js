@@ -21632,7 +21632,7 @@
 	    this.seed = _config2.default.seed;
 	    this.chunk = new _chunk2.default(this.seed);
 	    this.app = app;
-	    this.message = new _message2.default(['Loading', '0', 'of', '49', 'It can be a bit slow before finishing :)']);
+	    this.message = new _message2.default(['Loading', '0', 'of', '64', 'It can be a bit slow before finishing :)']);
 	    this.generateChunks();
 	  }
 
@@ -21645,8 +21645,8 @@
 	          while (1) {
 	            switch (_context.prev = _context.next) {
 	              case 0:
-	                chunks = 6;
-	                x = 0;
+	                chunks = 4;
+	                x = -3;
 
 	              case 2:
 	                if (!(x <= chunks)) {
@@ -21654,7 +21654,7 @@
 	                  break;
 	                }
 
-	                y = 0;
+	                y = -3;
 
 	              case 4:
 	                if (!(y <= chunks)) {
@@ -21706,7 +21706,7 @@
 	              case 0:
 	                return _context3.abrupt('return', new _promise2.default(function () {
 	                  var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(resolve) {
-	                    var stats, chunk, cubeSize, matrix, pxGeometry, nxGeometry, pyGeometry, pzGeometry, nzGeometry, nyGeometry, tmpGeometry, pxTmpGeometry, nxTmpGeometry, pyTmpGeometry, pzTmpGeometry, nzTmpGeometry, nyTmpGeometry, geometry, texture, mat1, texture2, mat2, texture3, mat3, mesh;
+	                    var stats, chunk, cubeSize, matrix, pxGeometry, nxGeometry, pyGeometry, pzGeometry, nzGeometry, nyGeometry, tmpGeometry, pxTmpGeometry, nxTmpGeometry, pyTmpGeometry, pzTmpGeometry, nzTmpGeometry, nyTmpGeometry, geometry, texture0, mat0, texture1, mat1, texture2, mat2, texture3, mat3, mesh;
 	                    return _regenerator2.default.wrap(function _callee2$(_context2) {
 	                      while (1) {
 	                        switch (_context2.prev = _context2.next) {
@@ -21781,28 +21781,33 @@
 	                            geometry = new _three.BufferGeometry().fromGeometry(tmpGeometry);
 
 	                            geometry.computeBoundingSphere();
-	                            texture = new _three.TextureLoader().load("../assets/textures/blocks/hardened_clay_stained_green.png");
-	                            mat1 = new _three.MeshLambertMaterial({
-	                              map: texture
+	                            texture0 = new _three.TextureLoader().load("../assets/textures/blocks/hardened_clay_stained_green.png");
+	                            mat0 = new _three.MeshLambertMaterial({
+	                              map: texture0
 	                            });
-	                            texture2 = new _three.TextureLoader().load("../assets/textures/blocks/dirt.png");
+	                            texture1 = new _three.TextureLoader().load("../assets/textures/blocks/dirt.png");
+	                            mat1 = new _three.MeshLambertMaterial({
+	                              map: texture1
+	                            });
+	                            texture2 = new _three.TextureLoader().load("../assets/textures/blocks/cobblestone_mossy.png");
 	                            mat2 = new _three.MeshLambertMaterial({
 	                              map: texture2
 	                            });
-	                            texture3 = new _three.TextureLoader().load("../assets/textures/blocks/cobblestone_mossy.png");
+	                            texture3 = new _three.TextureLoader().load("../assets/textures/blocks/log_spruce.png");
 	                            mat3 = new _three.MeshLambertMaterial({
 	                              map: texture3
 	                            });
+
 	                            // var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) );
 
-	                            mesh = new _three.Mesh(geometry, new _three.MultiMaterial([mat1, mat2, mat3]));
+	                            mesh = new _three.Mesh(geometry, new _three.MultiMaterial([mat0, mat1, mat2, mat3]));
 
 
 	                            _this.app.scene.add(mesh);
 
 	                            resolve();
 
-	                          case 41:
+	                          case 43:
 	                          case 'end':
 	                            return _context2.stop();
 	                        }
@@ -23948,7 +23953,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function() {
-		return new Worker(__webpack_require__.p + "0411b1fc0aeb2c1ae941.worker.js");
+		return new Worker(__webpack_require__.p + "3d8b3fdd09b93addf46b.worker.js");
 	};
 
 /***/ },

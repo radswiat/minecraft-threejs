@@ -15,7 +15,20 @@ export default class World {
     this.chunk = new Chunk(this.seed);
     this.app = app;
     this.message = new Message(['Loading', '0', 'of', '64', 'It can be a bit slow before finishing :)']);
+    // this.generateChunksDebug();
     this.generateChunks();
+  }
+
+  async generateChunksDebug() {
+    var chunks = 1;
+    for(let x = 0; x <= chunks; x++) {
+      for(let y = 0; y <= chunks; y++) {
+        Perf.get(`Chunk ${x}${y} gen`);
+        await this.generateChunk({ x, y });
+        this.message.increase(1);
+        Perf.get(`Chunk ${x}${y} gen`).end();
+      }
+    }
   }
 
   async generateChunks() {
@@ -83,25 +96,28 @@ export default class World {
 
       var geometry = new BufferGeometry().fromGeometry( tmpGeometry );
       geometry.computeBoundingSphere();
-      var texture0 = new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" );
-      var mat0 = new MeshLambertMaterial({
-        map : texture0
+      var matGrass = new MeshLambertMaterial({
+        map : new TextureLoader().load( "../assets/textures/blocks/hardened_clay_stained_green.png" )
       });
-      var texture1 = new TextureLoader().load( "../assets/textures/blocks/dirt.png" );
-      var mat1 = new MeshLambertMaterial({
-        map : texture1
+      var matDirt = new MeshLambertMaterial({
+        map : new TextureLoader().load( "../assets/textures/blocks/dirt.png" )
       });
-      var texture2 = new TextureLoader().load( "../assets/textures/blocks/cobblestone_mossy.png" );
-      var mat2 = new MeshLambertMaterial({
-        map : texture2
+      var matStone = new MeshLambertMaterial({
+        map : new TextureLoader().load( "../assets/textures/blocks/cobblestone_mossy.png" )
       });
-      var texture3 = new TextureLoader().load( "../assets/textures/blocks/log_spruce.png" );
-      var mat3 = new MeshLambertMaterial({
-        map : texture3
+      var matLog = new MeshLambertMaterial({
+        map : new TextureLoader().load( "../assets/textures/blocks/log_spruce.png" )
+      });
+      var matLeaves = new MeshLambertMaterial({
+        map : new TextureLoader().load( "../assets/textures/blocks/leaves.png" ),
+        transparent: true
       });
 
+
+
+
       // var mesh = new Mesh( geometry, new MeshLambertMaterial( { map: texture } ) );
-      var mesh = new Mesh( geometry, new MultiMaterial([mat0, mat1, mat2, mat3] ) );
+      var mesh = new Mesh( geometry, new MultiMaterial([matGrass, matDirt, matStone, matLog, matLeaves] ) );
 
       this.app.scene.add( mesh );
 
