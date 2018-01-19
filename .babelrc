@@ -1,10 +1,17 @@
 {
   "presets": [
-    "es2015",
-    "stage-0"
+    "env",
+    "stage-2"
   ],
   "plugins": [
     "transform-runtime",
-    "transform-decorators-legacy"
+    "transform-export-extensions",
+    ["module-resolver", {
+      "root": ["./src/"],
+      "alias": {
+
+      },
+      "extensions": [".js", ".jsx", ".scss", ".json"]
+    }]
   ]
 }
