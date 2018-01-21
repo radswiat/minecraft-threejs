@@ -4,20 +4,19 @@ import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
 const appBuildPath = path.resolve(process.cwd(), 'build/');
-const appMainJS = path.resolve(process.cwd(), 'src/app/main.js');
+const appMainJS = path.resolve(process.cwd(), 'src/main.js');
 const typedArrayJS = path.resolve(process.cwd(), 'src/lib/typedarray.js');
 
 module.exports = {
   devtool: 'cheap-module-source-map',
   entry: [
-    // index: [path.resolve(BASE_PATH, 'src/lib/typedarray.js'), path.resolve(BASE_PATH, 'src/app/main.js'), 'webpack-hot-middleware/client', 'webpack/hot/dev-server']
-    // Include an alternative client for WebpackDevServer
-    // require.resolve('react-dev-utils/webpackHotDevClient'),
     // Include babel-polyfills
     'babel-polyfill',
     // Errors should be considered fatal in development
+    require.resolve('react-error-overlay'),
     // Finally, this is your app's code:
     appMainJS,
     typedArrayJS,
@@ -57,17 +56,47 @@ module.exports = {
         // "oneOf" will traverse all following loaders until one will match
         oneOf: [
           {
-            test: /\.js$/,
+            test: /\.(js|jsx)$/,
             loader: 'babel-loader',
-            exclude: /node_modules/
+            exclude: /node_modules/,
+          },
+          // {
+          //   test: /\.html$/,
+          //   loader: 'raw-loader'
+          // },
+          {
+            test: /\.(scss|css)$/,
+            exclude: /node_modules/,
+            use: ['css-hot-loader'].concat(ExtractTextPlugin.extract({
+              fallback: 'style-loader',
+              use: [
+                {
+                  loader: 'css-loader',
+                  options: {
+                    importLoaders: 2,
+                    sourceMap: true,
+                  },
+                },
+                {
+                  loader: 'sass-loader',
+                  options: {
+                    sourceMap: true,
+                  },
+                },
+              ],
+            })),
           },
           {
-            test: /\.html$/,
-            loader: 'raw-loader'
-          },
-          {
-            test: /\.scss$/,
-            loaders: ["style", "css", "sass"]
+            test: /\.(gif|png|jpe?g|svg)$/i,
+            use: [
+              'file-loader',
+              {
+                loader: 'image-webpack-loader',
+                options: {
+                  bypassOnDebug: true,
+                },
+              },
+            ],
           },
           {
             // Fallback file loader
@@ -92,32 +121,21 @@ module.exports = {
     new webpack.NamedModulesPlugin(),
     // This is necessary to emit hot updates (currently CSS only):
     new webpack.HotModuleReplacementPlugin(),
-    // // Copy over public folder
-    // new CopyWebpackPlugin([{
-    //   context: path.resolve('./', 'src/public'),
-    //   from: '**/*.{ico,json,png,jpg,jpeg,svg,js}',
-    //   to: 'public',
-    // }]),
-    // new ExtractTextPlugin({
-    //   filename: 'style.css?v=[contenthash]',
-    //   allChunks: true,
-    //   ignoreOrder: true,
-    // }),
-    // Generates an `index.html` file with the <script> injected.
-    // new HtmlWebpackPlugin({
-    //   inject: true,
-    //   template: `${paths.appHtmlDir}/index.html`,
-    //   filename: 'index.html',
-    // }),
+    // extract style.css
+    new ExtractTextPlugin({
+      filename: 'style.css?v=[contenthash]',
+      allChunks: true,
+      ignoreOrder: true,
+    }),
+    // copy assets
     new CopyWebpackPlugin([
-      // {context: path.resolve(process.cwd(), 'src/seemore'), from: '**/*', to: 'seemore'},
-      {context: path.resolve(process.cwd(), 'src/assets'), from: '**/*', to: 'assets'},
-      // {context: path.resolve(process.cwd(), 'src/'), from: 'seemore.html', to: ''}
+      { context: path.resolve(process.cwd(), 'src/assets'), from: '**/*', to: 'assets' },
     ]),
+    // create index.html
     new HtmlWebpackPlugin({
       title: 'ThreeJS',
       filename: 'index.html',
-      template: path.resolve(process.cwd(), 'src/index.html')
+      template: path.resolve(process.cwd(), 'src/app/web/index.html'),
     }),
   ],
   // Some libraries import Node modules but don't use them in the browser.

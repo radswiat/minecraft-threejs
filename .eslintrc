@@ -1,11 +1,13 @@
 {
   "parser": "babel-eslint",
   "extends": [
-    "airbnb-base"
+    "airbnb-base",
+    "plugin:react/recommended"
   ],
   "plugins": [
     "jsdoc",
-    "filenames"
+    "filenames",
+    "react"
   ],
   "env": {
     "browser": true,
@@ -35,6 +37,7 @@
     }
   },
   "rules": {
+    "prefer-destructuring": "off",
     "spaced-comment": "off",
     "no-unused-expressions": "off",
     "func-names": "off",
@@ -81,6 +84,18 @@
 
     "filenames/match-regex": [2, "^(_){0,1}([a-zA-Z0-9])[0-9a-z-.]+$"],
     "filenames/match-exported": [2, "kebab", "_" ],
-    "filenames/no-index": "off"
+    "filenames/no-index": "off",
+
+    "import/no-dynamic-require": "off",
+    "import/prefer-default-export": "off",
+    "import/first": "off",
+    "import/no-extraneous-dependencies": "off",
+    "import/extensions": "off",
+    "import/no-unresolved": "off",
+    "import/no-mutable-exports": "off",
+    "import/order": ["error", {
+      "groups": ["builtin", "external", "internal", "sibling", "parent", "index"],
+      "newlines-between": "always-and-inside-groups"
+    }]
   }
 }

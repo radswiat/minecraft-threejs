@@ -5,13 +5,21 @@
   ],
   "plugins": [
     "transform-runtime",
+    "transform-react-jsx",
+    "jsx-control-statements",
+    "transform-decorators-legacy",
     "transform-export-extensions",
     ["module-resolver", {
-      "root": ["./src/"],
+      "root": ["/src"],
       "alias": {
-
-      },
-      "extensions": [".js", ".jsx", ".scss", ".json"]
+        "config": "./src/app/threejs/config",
+        "modules": "./src/app/threejs/modules",
+        "objects": "./src/app/threejs/objects",
+        "helpers": "./src/app/threejs/helpers",
+        "shared": "./src/app/shared",
+        "utils": "./src/app/threejs/utils",
+        "lib": "./src/lib"
+      }
     }]
   ]
 }

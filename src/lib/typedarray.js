@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /*
  Copyright (c) 2010, Linden Research, Inc.
  Copyright (c) 2014, Joshua Bell
