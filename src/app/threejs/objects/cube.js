@@ -1,6 +1,6 @@
-import THREE from 'three';
+import { Mesh, MeshLambertMaterial, BoxGeometry, ImageUtils } from 'three';
 
-export default class Sphere {
+export default class Cube {
 
   static isGui = false;
 
@@ -14,11 +14,11 @@ export default class Sphere {
 
   create() {
     // loading texture
-    var texture = THREE.ImageUtils.loadTexture("../assets/textures/blocks/hardened_clay_stained_green.png");
-    var cubeGeometry = new THREE.BoxGeometry(this.params.size, this.params.size, this.params.size);
-    var cubeMaterial = new THREE.MeshLambertMaterial();
+    const texture = ImageUtils.loadTexture('../assets/textures/blocks/hardened_clay_stained_green.png');
+    const cubeGeometry = new BoxGeometry(this.params.size, this.params.size, this.params.size);
+    const cubeMaterial = new MeshLambertMaterial();
     cubeMaterial.map = texture;
-    this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    this.cube = new Mesh(cubeGeometry, cubeMaterial);
     this.cube.castShadow = true;
 
 

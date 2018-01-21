@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import cx from 'classnames';
+
+import { observer } from 'mobx-react/index';
+import { storeAssetsLoader } from 'shared/store';
 
 import './wrapper.scss';
 
-export default class Wrapper extends Component {
+export class Wrapper extends Component {
 
   static propTypes = {
     children: PropTypes.node.isRequired,
@@ -11,7 +15,10 @@ export default class Wrapper extends Component {
 
   render() {
     return (
-      <div className="wrapper">
+      <div className={cx([
+        'wrapper',
+        storeAssetsLoader.isLoading ? 'wrapper--visible' : 'wrapper--hidden',
+      ])}>
         <div className="wrapper__foreground" />
         <div className="wrapper__container">
           {this.props.children}
@@ -22,3 +29,4 @@ export default class Wrapper extends Component {
 
 }
 
+export default observer(Wrapper);

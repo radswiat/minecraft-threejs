@@ -2,7 +2,6 @@ import {
   Geometry, BufferGeometry, PlaneBufferGeometry,
   Mesh, MeshLambertMaterial,
   TextureLoader, Matrix4,
-  CubeGeometry, MeshBasicMaterial, DoubleSide, RepeatWrapping,
 } from 'three';
 import PromiseThrottle from 'promise-throttle';
 
@@ -11,12 +10,22 @@ import { worldConfig } from 'config';
 import Chunk from 'modules/chunk';
 import { Perf } from 'utils';
 
+import spotLight from './comp/spot-light';
+import hemiLight from './comp/hemi-light';
+import ambientLight from './comp/ambient-light';
+import skybox from './comp/skybox';
+
 export default class World {
 
-  constructor({ app, seed }) {
+
+  meshes = [];
+  lights = [];
+
+  constructor({ app, seed, chunkOptions }) {
     this.seed = seed;
     this.chunk = new Chunk(this.seed);
     this.app = app;
+    this.chunkOptions = chunkOptions;
   }
 
   /**
@@ -60,133 +69,110 @@ export default class World {
     // render world chunks
     for (const chunk of this.worldChunks) {
       const mesh = new Mesh(chunk.geometry, [...chunk.params]);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      this.meshes.push(mesh);
       this.app.scene.add(mesh);
     }
     Perf.get('worldChunks render').end();
     // render skybox
-    this.skyBox();
+    const skyboxMesh = skybox();
+    this.app.scene.add(skyboxMesh);
+    this.meshes.push(skyboxMesh);
+
+    // add spotlight
+    const spotLightMesh = spotLight();
+    this.app.scene.add(spotLightMesh);
+    this.lights.push(spotLightMesh);
+
+    // hemi light
+    const hemiLightMesh = hemiLight();
+    this.app.scene.add(hemiLightMesh);
+    this.lights.push(hemiLightMesh);
+
+    // ambient light
+    const ambientLightMesh = ambientLight();
+    this.app.scene.add(ambientLightMesh);
+    this.lights.push(ambientLightMesh);
+
   }
 
-  skyBox() {
-    const geometry = new CubeGeometry(5000, 5000, 5000, 5000);
-
-    const textureTop = new TextureLoader().load('../assets/textures/blocks/sky_01.png');
-    textureTop.wrapS = RepeatWrapping;
-    textureTop.repeat.x = -1;
-
-    const textureRight = new TextureLoader().load('../assets/textures/blocks/sky_02.png');
-    textureRight.wrapS = RepeatWrapping;
-    textureRight.repeat.x = -1;
-
-    const textureLeft = new TextureLoader().load('../assets/textures/blocks/sky_02.png');
-    textureLeft.wrapS = RepeatWrapping;
-    textureLeft.repeat.x = -1;
-
-    const textureBack = new TextureLoader().load('../assets/textures/blocks/sky_02.png');
-
-    const cubeMaterials = [
-      new MeshBasicMaterial({
-        map: textureBack, // back
-        side: DoubleSide,
-      }),
-      new MeshBasicMaterial({
-        map: new TextureLoader().load( '../assets/textures/blocks/sky_02.png' ), // front
-        side: DoubleSide,
-      }),
-      new MeshBasicMaterial({
-        map: textureTop, // top
-        side: DoubleSide,
-      }),
-      new MeshBasicMaterial({
-        map: new TextureLoader().load( '../assets/textures/blocks/dirt.png' ),
-        side: DoubleSide,
-      }),
-      new MeshBasicMaterial({
-        map: textureLeft, // left
-        side: DoubleSide,
-      }),
-      new MeshBasicMaterial({
-        map: textureRight, // right
-        side: DoubleSide,
-      }),
-    ];
-
-    const sky = new Mesh(geometry, [...cubeMaterials]);
-    this.app.scene.add(sky);
+  destroy() {
+    for (const mesh of this.meshes) {
+      this.app.scene.remove(mesh);
+    }
+    for (const light of this.lights) {
+      this.app.scene.remove(light);
+    }
   }
 
   async generateChunk(location) {
-    return new Promise( async (resolve) => {
+    return new Promise(async (resolve) => {
 
       const stats = { drawn: 0 };
-      const chunk = this.chunk;
       const cubeSize = worldConfig.cubeSize;
 
-      var matrix = new Matrix4();
-      var pxGeometry = new PlaneBufferGeometry( cubeSize, cubeSize );
-      pxGeometry.rotateY( Math.PI / 2 );
-      pxGeometry.translate( cubeSize / 2, 0, 0 );
-      var nxGeometry = new PlaneBufferGeometry( cubeSize, cubeSize );
-      nxGeometry.rotateY( - Math.PI / 2 );
-      nxGeometry.translate( - cubeSize / 2, 0, 0 );
-      var pyGeometry = new PlaneBufferGeometry( cubeSize, cubeSize );
-      pyGeometry.rotateX( - Math.PI / 2 );
-      pyGeometry.translate( 0, cubeSize / 2, 0 );
-      var pzGeometry = new PlaneBufferGeometry( cubeSize, cubeSize );
-      pzGeometry.translate( 0, 0, cubeSize / 2 );
-      var nzGeometry = new PlaneBufferGeometry( cubeSize, cubeSize );
-      nzGeometry.rotateY( Math.PI );
-      nzGeometry.translate( 0, 0, - cubeSize / 2 );
-      var nyGeometry = new PlaneBufferGeometry( cubeSize, cubeSize );
-      nyGeometry.rotateX( Math.PI / 2 );
-      nyGeometry.translate( 0, - cubeSize / 2, 0 );
+      const matrix = new Matrix4();
+      const pxGeometry = new PlaneBufferGeometry(cubeSize, cubeSize);
+      pxGeometry.rotateY(Math.PI / 2);
+      pxGeometry.translate(cubeSize / 2, 0, 0);
+      const nxGeometry = new PlaneBufferGeometry(cubeSize, cubeSize);
+      nxGeometry.rotateY(-Math.PI / 2);
+      nxGeometry.translate(-cubeSize / 2, 0, 0);
+      const pyGeometry = new PlaneBufferGeometry(cubeSize, cubeSize);
+      pyGeometry.rotateX(-Math.PI / 2);
+      pyGeometry.translate(0, cubeSize / 2, 0);
+      const pzGeometry = new PlaneBufferGeometry(cubeSize, cubeSize);
+      pzGeometry.translate(0, 0, cubeSize / 2);
+      const nzGeometry = new PlaneBufferGeometry(cubeSize, cubeSize);
+      nzGeometry.rotateY(Math.PI);
+      nzGeometry.translate(0, 0, -cubeSize / 2);
+      const nyGeometry = new PlaneBufferGeometry(cubeSize, cubeSize);
+      nyGeometry.rotateX(Math.PI / 2);
+      nyGeometry.translate(0, -cubeSize / 2, 0);
 
       // BufferGeometry
-      var tmpGeometry = new Geometry();
-      var pxTmpGeometry = new Geometry().fromBufferGeometry( pxGeometry );
-      var nxTmpGeometry = new Geometry().fromBufferGeometry( nxGeometry );
-      var pyTmpGeometry = new Geometry().fromBufferGeometry( pyGeometry );
-      var pzTmpGeometry = new Geometry().fromBufferGeometry( pzGeometry );
-      var nzTmpGeometry = new Geometry().fromBufferGeometry( nzGeometry );
-      var nyTmpGeometry = new Geometry().fromBufferGeometry( nyGeometry );
+      const tmpGeometry = new Geometry();
+      const pxTmpGeometry = new Geometry().fromBufferGeometry( pxGeometry );
+      const nxTmpGeometry = new Geometry().fromBufferGeometry( nxGeometry );
+      const pyTmpGeometry = new Geometry().fromBufferGeometry( pyGeometry );
+      const pzTmpGeometry = new Geometry().fromBufferGeometry( pzGeometry );
+      const nzTmpGeometry = new Geometry().fromBufferGeometry( nzGeometry );
+      const nyTmpGeometry = new Geometry().fromBufferGeometry( nyGeometry );
 
       // generate chunk
-      await chunk.generateChunk(location, (cube) => {
-
+      await this.chunk.generateChunk(location, this.chunkOptions, (cube) => {
         stats.drawn++;
         matrix.makeTranslation(cube.location.x * cubeSize, cube.location.y * cubeSize, cube.location.z * cubeSize);
 
         // Check what cube geometry should be drawn
-        if( !cube.surrounding.px ) { tmpGeometry.merge( pxTmpGeometry, matrix, cube.material ); }
-        if( !cube.surrounding.nx ) { tmpGeometry.merge( nxTmpGeometry, matrix, cube.material ); }
-        if( !cube.surrounding.py ) { tmpGeometry.merge( pyTmpGeometry, matrix, cube.material ); }
-        if( !cube.surrounding.pz ) { tmpGeometry.merge( pzTmpGeometry, matrix, cube.material ); }
-        if( !cube.surrounding.nz ) { tmpGeometry.merge( nzTmpGeometry, matrix, cube.material ); }
-        if( !cube.surrounding.ny ) { tmpGeometry.merge( nyTmpGeometry, matrix, cube.material ); }
-
+        if (!cube.surrounding.px) { tmpGeometry.merge(pxTmpGeometry, matrix, cube.material); }
+        if (!cube.surrounding.nx) { tmpGeometry.merge(nxTmpGeometry, matrix, cube.material); }
+        if (!cube.surrounding.py) { tmpGeometry.merge(pyTmpGeometry, matrix, cube.material); }
+        if (!cube.surrounding.pz) { tmpGeometry.merge(pzTmpGeometry, matrix, cube.material); }
+        if (!cube.surrounding.nz) { tmpGeometry.merge(nzTmpGeometry, matrix, cube.material); }
+        if (!cube.surrounding.ny) { tmpGeometry.merge(nyTmpGeometry, matrix, cube.material); }
       });
 
-      var geometry = new BufferGeometry().fromGeometry( tmpGeometry );
+      const geometry = new BufferGeometry().fromGeometry( tmpGeometry );
       geometry.computeBoundingSphere();
-      var matGrass = new MeshLambertMaterial({
-        map : new TextureLoader().load( '../assets/textures/blocks/hardened_clay_stained_green.png' )
+      const matGrass = new MeshLambertMaterial({
+        map: new TextureLoader().load('../assets/textures/blocks/hardened_clay_stained_green.png'),
       });
-      var matDirt = new MeshLambertMaterial({
-        map : new TextureLoader().load( '../assets/textures/blocks/dirt.png' )
+      const matDirt = new MeshLambertMaterial({
+        map: new TextureLoader().load('../assets/textures/blocks/dirt.png'),
       });
-      var matStone = new MeshLambertMaterial({
-        map : new TextureLoader().load( '../assets/textures/blocks/cobblestone_mossy.png' )
+      const matStone = new MeshLambertMaterial({
+        map: new TextureLoader().load('../assets/textures/blocks/cobblestone_mossy.png'),
       });
-      var matLog = new MeshLambertMaterial({
-        map : new TextureLoader().load( '../assets/textures/blocks/log_spruce.png' )
+      const matLog = new MeshLambertMaterial({
+        map: new TextureLoader().load('../assets/textures/blocks/log_spruce.png'),
       });
-      var matLeaves = new MeshLambertMaterial({
-        map : new TextureLoader().load( '../assets/textures/blocks/leaves.png' ),
-        transparent: true
+      const matLeaves = new MeshLambertMaterial({
+        map: new TextureLoader().load('../assets/textures/blocks/leaves.png'),
+        transparent: true,
       });
 
-      // const mesh = new Mesh(geometry, [matGrass, matDirt, matStone, matLog, matLeaves]);
-      // this.app.scene.add(mesh);
       resolve({
         geometry,
         params: [matGrass, matDirt, matStone, matLog, matLeaves],

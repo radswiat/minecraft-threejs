@@ -11,14 +11,14 @@ export default class Chunk {
     this.seed = seed;
   }
 
-  async generateNoise(location) {
+  async generateNoise(location, options) {
     return new Promise((resolve) => {
       const worker = new ChunkNoiseWorker();
       worker.postMessage({
         seed: this.seed,
         chunkLocation: location,
         chunkSize: worldConfig.chunkSize,
-        mod: 30,
+        ...options,
       });
       worker.onmessage = (e) => {
         this.cubeNoiseCache = e.data;
@@ -33,9 +33,9 @@ export default class Chunk {
    * @param cb
    * @return {Promise<any>}
    */
-  generateChunk(location, cb) {
+  generateChunk(location, options, cb) {
     return new Promise(async (resolve) => {
-      await this.generateNoise(location);
+      await this.generateNoise(location, options);
       this.cb = cb;
       for (const p in this.cubeNoiseCache) {
         cb(this.cubeNoiseCache[p]);

@@ -13,6 +13,7 @@ export default new class AssetsLoader {
   // component will be updated when it will change
   @observable progress = 0;
   @observable max = 0;
+  @observable isLoading = false;
 
   @action reset() {
     this.title = '';
@@ -31,6 +32,10 @@ export default new class AssetsLoader {
 
   @action incrementProgress() {
     this.progress++;
+  }
+
+  @action setLoading(value) {
+    this.isLoading = !!value;
   }
 
 };

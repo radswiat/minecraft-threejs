@@ -5,11 +5,13 @@ import {
   Scene,
 } from 'three';
 
+import dat from 'helpers/dat-gui';
 import { worldConfig } from 'config';
 import AssetsLoader from 'modules/assets-loader';
 import Camera from 'modules/camera';
 import World from 'modules/world';
 import { Perf } from 'utils';
+import { storeAssetsLoader } from 'shared/store';
 
 // import three js extensions
 import 'lib/first-person-controls';
@@ -39,6 +41,8 @@ export default class App {
 
   async init() {
 
+    storeAssetsLoader.setLoading(true);
+
     // load assets
     const assetsLoader = new AssetsLoader();
     await assetsLoader.loadAssets();
@@ -50,6 +54,24 @@ export default class App {
     this.world = new World({
       app: this,
       seed: worldConfig.seed,
+      chunkOptions: {
+        mod: 30,
+      },
+    });
+
+    dat.onChange('world:chunk:mod', async (value) => {
+      storeAssetsLoader.setLoading(true);
+      this.world.destroy();
+      this.world = new World({
+        app: this,
+        seed: worldConfig.seed,
+        chunkOptions: {
+          mod: value,
+        },
+      });
+      await this.world.generateWorld();
+      this.world.renderWorld();
+      storeAssetsLoader.setLoading(false);
     });
 
     // generate world chunks
@@ -60,6 +82,8 @@ export default class App {
     // required before rendering anything to the scene
     // - at this point, react will be replaced with threejs!
     this.createRenderer();
+
+    storeAssetsLoader.setLoading(false);
 
     // axis helper
     // show axis for debugging
@@ -90,11 +114,6 @@ export default class App {
   }
 
   createLights() {
-    const spotLight = new SpotLight(0xffffe5);
-    spotLight.position.set(50, 60, 50);
-    spotLight.castShadow = true;
-    this.scene.add(spotLight);
-
     const directionalLight = new DirectionalLight(0xffffff, 1.4);
     directionalLight.position.set(-50, 50, 50);
     this.scene.add(directionalLight);

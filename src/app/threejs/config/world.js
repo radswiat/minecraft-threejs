@@ -4,7 +4,7 @@ export default {
   // size of each cube
   cubeSize: 20,
   // chunks count - how many chunks we render on screen
-  chunks: 1,
+  chunks: 4,
   // size of each chunks
   chunkSize: 26,
 };

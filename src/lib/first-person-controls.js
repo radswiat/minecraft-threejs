@@ -78,8 +78,6 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
   this.onMouseDown = function ( event ) {
 
-    console.log(event);
-
     var isRightMB;
     if ("which" in event)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
       isRightMB = event.which == 3;
@@ -121,8 +119,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
   this.onMouseUp = function ( event ) {
 
-    event.preventDefault();
-    event.stopPropagation();
+    // event.preventDefault();
+    // event.stopPropagation();
 
     if ( this.activeLook ) {
 
