@@ -2,26 +2,29 @@ import { SpotLight, SpotLightHelper } from 'three';
 
 import dat from 'helpers/dat-gui';
 
-export default function spotLight(scene) {
-  const light = new SpotLight(0xffffe5);
+export default function spotLight() {
+  const light = new SpotLight(0x8c8c8c);
 
   // light.target.position.set(0, 0, 0);
-  light.position.set(-611, 1289, -3863);
-  light.angle = Math.PI / 4;
+  light.position.set(-441, 889, -1563);
+  light.angle = Math.PI / 2.2;
   light.penumbra = 0.00;
   light.decay = 1;
   light.distance = 10000;
   light.castShadow = true;
-  light.shadow.mapSize.width = 1024;
-  light.shadow.mapSize.height = 1024;
-  light.shadow.camera.near = 10;
-  light.shadow.camera.far = 200;
+  light.shadow.mapSize.width = 2048;
+  light.shadow.mapSize.height = 2048;
+  light.shadow.camera.near = 1;
+  light.shadow.camera.far = 2000;
 
-  // const lightHelper = new SpotLightHelper(light);
-  // scene.add(lightHelper);
+  const lightHelper = new SpotLightHelper(light);
 
   dat.onChange('spot:light:color', (value) => {
     light.color.setHex(value);
+    lightHelper.update();
+  });
+  dat.onChange('spot:light:bias', (value) => {
+    light.shadow.bias = value;
     lightHelper.update();
   });
   dat.onChange('spot:light:position:x', (value) => {
@@ -65,5 +68,5 @@ export default function spotLight(scene) {
     lightHelper.update();
   });
 
-  return light;
+  return [light, lightHelper];
 }

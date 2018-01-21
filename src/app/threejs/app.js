@@ -60,6 +60,7 @@ export default class App {
     });
 
     dat.onChange('world:chunk:mod', async (value) => {
+      if (storeAssetsLoader.isLoading) return;
       storeAssetsLoader.setLoading(true);
       this.world.destroy();
       this.world = new World({

@@ -82,8 +82,8 @@ export default class World {
 
     // add spotlight
     const spotLightMesh = spotLight();
-    this.app.scene.add(spotLightMesh);
-    this.lights.push(spotLightMesh);
+    this.app.scene.add(...spotLightMesh);
+    this.lights.push(...spotLightMesh);
 
     // hemi light
     const hemiLightMesh = hemiLight();

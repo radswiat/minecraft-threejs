@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 
 import Logo from './app/components/logo';
+import Help from './app/components/help';
 import { Wrapper } from './app/components/containers';
 import Preloader from './app/components/preloader';
 
@@ -31,6 +32,7 @@ export default class App {
       <Wrapper>
         <Logo />
         <Preloader />
+        <Help />
       </Wrapper>,
       document.getElementById('root'),
     );

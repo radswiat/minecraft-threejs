@@ -8,24 +8,25 @@ export default new class DatGUI {
 
   controlsGroups = [
     ['World', 'world', [
-      ['add', 'chunk:mod', 30, 0, 60],
+      ['add', 'chunk:mod', 30.00, -60.00, 60.00],
     ]],
     ['Spot light', 'spot:light', [
-      ['addColor', 'color', 0xffffe5],
-      ['add', 'position:x', -611, -100000, 100000],
-      ['add', 'position:y', 1289, -100000, 100000],
-      ['add', 'position:z', -3863, -100000, 100000],
-      ['add', 'angle', 4, -10, 10],
+      ['addColor', 'color', 0x8c8c8c],
+      ['add', 'position:x', -441, -100000, 100000],
+      ['add', 'position:y', 889, -100000, 100000],
+      ['add', 'position:z', -1563, -100000, 100000],
+      ['add', 'angle', 2.2, -10.0, 10.0],
       ['add', 'penumbra', 0.00, 0, 1],
       ['add', 'decay', 1, -10, 10],
       ['add', 'distance', 10000, 0, 20000],
+      ['add', 'bias', 0.0000, -0.0003, 0.0003],
     ]],
     ['Ambient light', 'ambient:light', [
-      ['addColor', 'color', 0x404040],
+      ['addColor', 'color', 0x919191],
     ]],
     ['Hemi light', 'hemi:light', [
-      ['addColor', 'color1', 0x555555],
-      ['addColor', 'color2', 0x0],
+      ['addColor', 'color1', 0x6a777d],
+      ['addColor', 'color2', 0x848484],
       ['add', 'intensity', 0.6, -1, 1],
     ]],
   ];

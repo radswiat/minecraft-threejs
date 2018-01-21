@@ -3,7 +3,7 @@ import { HemisphereLight } from 'three';
 import dat from 'helpers/dat-gui';
 
 export default function hemiLight(scene) {
-  const light = new HemisphereLight(0x555555, 0x0, 0.6);
+  const light = new HemisphereLight(0x6a777d, 0x848484, 0.6);
 
   dat.onChange('hemi:light:color1', (value) => {
     light.color.setHex(value);

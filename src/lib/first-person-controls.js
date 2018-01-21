@@ -85,7 +85,6 @@ THREE.FirstPersonControls = function ( object, domElement ) {
       isRightMB = event.button == 2;
     if(isRightMB) {
       isRightMB = event.button == 2;
-
     }
 
     if (event.button === 1) {
@@ -173,7 +172,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
       case 82: /*R*/ this.moveUp = true; break;
       case 70: /*F*/ this.moveDown = true; break;
-
+      case 76: /*F*/ this.enabled = !this.enabled; break;
     }
 
   };
