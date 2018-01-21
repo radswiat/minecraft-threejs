@@ -1,10 +1,6 @@
-import {
-  WebGLRenderer, AxisHelper,
-  PCFSoftShadowMap,
-  SpotLight, DirectionalLight,
-  Scene,
-} from 'three';
+import { AxisHelper, DirectionalLight, Scene } from 'three';
 
+import renderer from 'engine/renderer';
 import dat from 'helpers/dat-gui';
 import { worldConfig } from 'config';
 import AssetsLoader from 'modules/assets-loader';
@@ -82,7 +78,7 @@ export default class App {
     // create renderer
     // required before rendering anything to the scene
     // - at this point, react will be replaced with threejs!
-    this.createRenderer();
+    renderer.create('#WebGL-output');
 
     storeAssetsLoader.setLoading(false);
 
@@ -97,16 +93,10 @@ export default class App {
     this.createLights();
     this.camera = new Camera(this);
     Perf.get('Engine starts').end();
-    requestAnimationFrame(this.update.bind(this));
-  }
 
-  createRenderer() {
-    this.renderer = new WebGLRenderer();
-    this.renderer.setClearColor(0xEEEEEE, 1.0);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
-    document.querySelector('#WebGL-output').appendChild(this.renderer.domElement);
+    // start renderer loop
+    // - it will initialize infinite rendering
+    renderer.render(this.scene, this.camera);
   }
 
   createAxis() {
@@ -120,19 +110,4 @@ export default class App {
     this.scene.add(directionalLight);
   }
 
-  render() {
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  registerUpdate(cb) {
-    this.updateStack.push(cb);
-  }
-
-  update() {
-    this.updateStack.forEach((cb) => {
-      cb();
-    });
-    this.render();
-    requestAnimationFrame(this.update.bind(this));
-  }
 }

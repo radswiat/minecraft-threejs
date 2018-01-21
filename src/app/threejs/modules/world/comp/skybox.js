@@ -3,10 +3,10 @@ import {
 } from 'three';
 
 export default function skybox(scene) {
-  const geometry = new CubeGeometry(5000, 5000, 5000, 5000);
+  const skyboxSize = 25000;
+  const geometry = new CubeGeometry(skyboxSize, skyboxSize, skyboxSize, skyboxSize);
 
   const skyTop = new TextureLoader().load('../assets/textures/skybox/1/sky_02.png');
-  console.log(skyTop);
 
   const skyLeft = new TextureLoader().load('../assets/textures/skybox/1/sky_04.png');
   skyLeft.wrapS = RepeatWrapping;

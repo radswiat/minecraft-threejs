@@ -13,6 +13,7 @@
       "root": ["/src"],
       "alias": {
         "config": "./src/app/threejs/config",
+        "engine": "./src/app/threejs/engine",
         "modules": "./src/app/threejs/modules",
         "objects": "./src/app/threejs/objects",
         "helpers": "./src/app/threejs/helpers",

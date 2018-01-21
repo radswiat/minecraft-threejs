@@ -12,6 +12,7 @@ export default new class DatGUI {
     ]],
     ['Spot light', 'spot:light', [
       ['addColor', 'color', 0x8c8c8c],
+      ['add', 'shadow', 4096, 0, 100000],
       ['add', 'position:x', -441, -100000, 100000],
       ['add', 'position:y', 889, -100000, 100000],
       ['add', 'position:z', -1563, -100000, 100000],

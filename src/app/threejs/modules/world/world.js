@@ -10,16 +10,18 @@ import { worldConfig } from 'config';
 import Chunk from 'modules/chunk';
 import { Perf } from 'utils';
 
-import spotLight from './comp/spot-light';
+import SpotLight from './comp/spot-light';
 import hemiLight from './comp/hemi-light';
 import ambientLight from './comp/ambient-light';
 import skybox from './comp/skybox';
+import btTower from './comp/bt-tower';
 
 export default class World {
 
 
   meshes = [];
   lights = [];
+  objects = [];
 
   constructor({ app, seed, chunkOptions }) {
     this.seed = seed;
@@ -56,6 +58,12 @@ export default class World {
       }
     }
 
+    // uncomment for debugging ( speed up world loading, comment out the above for loop )
+    // const throttlePromise = promiseThrottle.add(this.generateChunk.bind(this, { x: 1, y: 1 }));
+    // chunksDefer.push(
+    //   throttlePromise,
+    // );
+
     // set max store value
     storeAssetsLoader.setMax(chunksDefer.length);
 
@@ -81,9 +89,9 @@ export default class World {
     this.meshes.push(skyboxMesh);
 
     // add spotlight
-    const spotLightMesh = spotLight();
-    this.app.scene.add(...spotLightMesh);
-    this.lights.push(...spotLightMesh);
+    const spotLight = new SpotLight(this.app.scene);
+    spotLight.render();
+    this.objects.push(...spotLight);
 
     // hemi light
     const hemiLightMesh = hemiLight();
@@ -95,6 +103,8 @@ export default class World {
     this.app.scene.add(ambientLightMesh);
     this.lights.push(ambientLightMesh);
 
+    // obj, bt tower
+    btTower(this.app.scene);
   }
 
   destroy() {
@@ -133,12 +143,12 @@ export default class World {
 
       // BufferGeometry
       const tmpGeometry = new Geometry();
-      const pxTmpGeometry = new Geometry().fromBufferGeometry( pxGeometry );
-      const nxTmpGeometry = new Geometry().fromBufferGeometry( nxGeometry );
-      const pyTmpGeometry = new Geometry().fromBufferGeometry( pyGeometry );
-      const pzTmpGeometry = new Geometry().fromBufferGeometry( pzGeometry );
-      const nzTmpGeometry = new Geometry().fromBufferGeometry( nzGeometry );
-      const nyTmpGeometry = new Geometry().fromBufferGeometry( nyGeometry );
+      const pxTmpGeometry = new Geometry().fromBufferGeometry(pxGeometry);
+      const nxTmpGeometry = new Geometry().fromBufferGeometry(nxGeometry);
+      const pyTmpGeometry = new Geometry().fromBufferGeometry(pyGeometry);
+      const pzTmpGeometry = new Geometry().fromBufferGeometry(pzGeometry);
+      const nzTmpGeometry = new Geometry().fromBufferGeometry(nzGeometry);
+      const nyTmpGeometry = new Geometry().fromBufferGeometry(nyGeometry);
 
       // generate chunk
       await this.chunk.generateChunk(location, this.chunkOptions, (cube) => {
