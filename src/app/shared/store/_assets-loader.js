@@ -1,8 +1,8 @@
-import { observable, action, useStrict } from 'mobx';
+import { observable, action, configure } from 'mobx';
 
-// use strict mode of mobx
-// it will prevent of assigning values outside of @actions
-useStrict(true);
+configure({
+  enforceActions: true,
+});
 
 /**
  * Demo of MobX store
