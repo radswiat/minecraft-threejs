@@ -2,4 +2,4 @@ version: 0.2
 phases:
  build:
    commands:
-     - aws s3 sync --delete . "s3://radswiat"
+     - aws s3 sync --delete . --include ./dist "s3://radswiat/minecraft"
