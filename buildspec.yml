@@ -2,4 +2,4 @@ version: 0.2
 phases:
  post_build:
    commands:
-     - aws s3 sync --delete dist s3://radswiat.co.uk/minecraft
+     - aws s3 sync --delete dist s3://radswiat.co.uk
