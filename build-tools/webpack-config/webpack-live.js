@@ -6,7 +6,7 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 
-const appBuildPath = path.resolve(process.cwd(), 'build/');
+const appBuildPath = path.resolve(process.cwd(), 'dist/');
 const appMainJS = path.resolve(process.cwd(), 'src/main.js');
 const typedArrayJS = path.resolve(process.cwd(), 'src/lib/typedarray.js');
 
