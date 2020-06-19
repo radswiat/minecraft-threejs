@@ -1,7 +1,7 @@
-import { Geometry, Material } from 'THREE'
+import { BufferGeometry, Material, BoxHelper } from 'THREE'
 
 export interface WorldChunk {
-  geometry: Geometry
-  helperGeometries: Geometry[]
-  params: Material[]
+  geometry: BufferGeometry
+  helperGeometries: BufferGeometry[] | BoxHelper[]
+  params?: Material[]
 }

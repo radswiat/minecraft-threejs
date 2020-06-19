@@ -1,10 +1,16 @@
-import { SpotLight as _SpotLight, SpotLightHelper } from 'three'
+import { SpotLight as _SpotLight, SpotLightHelper, Scene, Object3D } from 'three'
 
-import dat from '@game/helpers/dat-gui'
+// import dat from '@game/helpers/dat-gui'
+import dat from '@game/helpers/dat'
 import renderer from '@game/system/engine/renderer'
 
 export default class SpotLight {
-  constructor(scene) {
+  private target: Object3D = null
+  private light: _SpotLight = null
+  private scene: Scene = null
+  private lightHelper: SpotLightHelper = null
+
+  constructor(scene: Scene) {
     this.scene = scene
     this._createLight()
     this._createLightHelper()
@@ -12,30 +18,22 @@ export default class SpotLight {
     renderer.onUpdate(this._update)
   }
 
-  render() {
-    this.scene.add(this.light)
-    this.scene.add(this.lightHelper)
-  }
-
-  _update = () => {
-    this.light.position.y -= 0.005
-    this.light.position.x += 0.005
-  }
-
   /**
    * Create spot light
    * @private
    */
   _createLight() {
+    this.target = new Object3D()
     this.light = new _SpotLight(0x8c8c8c)
-    this.light.position.set(-441, 889, -1563)
+    this.light.target = this.target
+    this.light.position.set(-1861, -801, 1367)
     this.light.angle = Math.PI / 2.2
     this.light.penumbra = 0.0
     this.light.decay = 1
     this.light.distance = 10000
     this.light.castShadow = true
-    this.light.shadow.mapSize.width = 1254
-    this.light.shadow.mapSize.height = 1254
+    this.light.shadow.mapSize.width = 2048
+    this.light.shadow.mapSize.height = 2048
     this.light.shadow.camera.near = 1
     this.light.shadow.camera.far = 2000
   }
@@ -53,58 +51,34 @@ export default class SpotLight {
    * @private
    */
   _bindDat() {
-    dat.onChange('spot:light:color', (value) => {
-      this.light.color.setHex(value)
+    const datSpotLight = dat.createSpace('SpotLight', this.light)
+    datSpotLight.onChange(() => {
       this.lightHelper.update()
     })
-    dat.onChange('spot:light:shadow', (value) => {
-      this.light.shadow.mapSize.width = value
-      this.light.shadow.mapSize.height = value
-    })
-    this.light.shadow.mapSize.width
-    dat.onChange('spot:light:bias', (value) => {
-      this.light.shadow.bias = value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:position:x', (value) => {
-      this.light.position.x = value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:position:y', (value) => {
-      this.light.position.y = value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:position:z', (value) => {
-      this.light.position.z = value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:target:x', (value) => {
-      this.light.target.position.set(value, 0, 0)
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:target:y', (value) => {
-      this.light.target.position.y = value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:target:z', (value) => {
-      this.light.target.position.z = value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:angle', (value) => {
-      this.light.angle = Math.PI / value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:penumbra', (value) => {
-      this.light.penumbra = value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:decay', (value) => {
-      this.light.decay = value
-      this.lightHelper.update()
-    })
-    dat.onChange('spot:light:distance', (value) => {
-      this.light.distance = value
-      this.lightHelper.update()
-    })
+    datSpotLight.addColor('color')
+    datSpotLight.add('position.x', { range: 10000, opts: [1] })
+    datSpotLight.add('position.y', { range: 10000, opts: [1] })
+    datSpotLight.add('position.z', { range: 10000, opts: [1] })
+    datSpotLight.add('target.position.x', { range: 10000, opts: [1] })
+    datSpotLight.add('target.position.y', { range: 10000, opts: [1] })
+    datSpotLight.add('target.position.z', { range: 10000, opts: [1] })
+    datSpotLight.add('shadow.mapSize.width', { range: 10000, opts: [1] })
+    datSpotLight.add('shadow.mapSize.height', { range: 10000, opts: [1] })
+    datSpotLight.add('shadow.bias', { range: 10000, opts: [1] })
+    datSpotLight.add('angle', { opts: [0, 90, 1], convert: 'deg' })
+    datSpotLight.add('penumbra', { range: 10000, opts: [1] })
+    datSpotLight.add('decay', { range: 10000, opts: [1] })
+    datSpotLight.add('distance', { range: 10000, opts: [1] })
+  }
+
+  render() {
+    this.scene.add(this.light)
+    this.scene.add(this.lightHelper)
+    this.scene.add(this.target)
+  }
+
+  _update = () => {
+    this.light.position.z -= 0.005
+    this.light.position.x += 0.005
   }
 }

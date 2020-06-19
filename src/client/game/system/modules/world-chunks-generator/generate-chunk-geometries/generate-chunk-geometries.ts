@@ -5,14 +5,14 @@ import createCubePlanes from './createCubePlanes'
 import createOptimizedCubeGeometry from './createOptimizedCubeGeometry'
 import createChunkBoxHelper from './createChunkBoxHelper'
 
-import { Chunk } from '../world-chunks-generator.types'
+import { Chunk, ChunkGeometries } from '../world-chunks-generator.types'
 
 /**
  * Generate single chunk
  * @param chunk
  * @param chunkNoise
  */
-export default async function generateChunkGeometries(chunk: Chunk, { location }) {
+export default async function generateChunkGeometries(chunk: Chunk, { location }): Promise<ChunkGeometries> {
   return new Promise(async (resolve) => {
     const cubeSize = worldConfig.cubeSize
 

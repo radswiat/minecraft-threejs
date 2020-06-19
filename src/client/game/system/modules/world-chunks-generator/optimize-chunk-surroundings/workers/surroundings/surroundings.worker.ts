@@ -1,6 +1,6 @@
 import { Perf } from '@game/utils'
 
-import { Chunk, ChunkData, ChunkCoordinated, ChunkDataCoordinated } from '../../../world-chunks-generator.types'
+import { ChunkData, ChunkCoordinated, ChunkDataCoordinated } from '../../../world-chunks-generator.types'
 
 const ctx: Worker = self as any
 
@@ -8,20 +8,25 @@ function getChunkFromLocation(chunks: ChunkDataCoordinated, x: number, y: number
   return !!chunks[`${x}:${y}:${z}`]
 }
 
+function isAboveThreshold(noise, threshold, thresholdMod, z) {
+  // console.log(`y: ${threshold - (z + 13) / 100}`)
+  return noise < threshold - Math.pow(z + 13, (z + 13) / thresholdMod) / 100
+}
+
 ctx.addEventListener(
   'message',
   ({ data }) => {
     Perf.get(`⚙ surroundings worker`)
-
-    const chunks = data.chunks as ChunkCoordinated
+    const chunks = JSON.parse(data.chunks) as ChunkCoordinated
     const noiseRenderThreshold = data.noiseRenderThreshold as number
+    const thresholdMod = data.thresholdMod
 
     // convert to 3D
     // we need to find particular blocks by x,y,z coords so we need to convert them into [x,y,z] notation
     const blocks: ChunkDataCoordinated = {}
     Object.entries(chunks).forEach(([key, value]) => {
       value.data.forEach((chunk) => {
-        if (chunk.noiseValue < noiseRenderThreshold) {
+        if (isAboveThreshold(chunk.noiseValue, noiseRenderThreshold, thresholdMod, chunk.absLocation.z)) {
           blocks[`${chunk.location.x}:${chunk.location.y}:${chunk.location.z}`] = chunk
         }
       })
@@ -30,7 +35,7 @@ ctx.addEventListener(
     Object.entries(chunks).forEach(([key, value]) => {
       const chunk = chunks[key]
       chunk.data = chunk.data.filter((chunkData: ChunkData) => {
-        return chunkData.noiseValue < noiseRenderThreshold
+        return isAboveThreshold(chunkData.noiseValue, noiseRenderThreshold, thresholdMod, chunkData.absLocation.z)
       })
       chunk.data = chunk.data.map((data) => {
         const { x, y, z } = data.location
@@ -44,9 +49,10 @@ ctx.addEventListener(
         }
         return data
       })
+      ctx.postMessage({ done: false })
     })
 
-    ctx.postMessage(chunks)
+    ctx.postMessage({ done: true, data: JSON.stringify(chunks) })
     Perf.get(`⚙ surroundings worker`).end()
   },
   false,

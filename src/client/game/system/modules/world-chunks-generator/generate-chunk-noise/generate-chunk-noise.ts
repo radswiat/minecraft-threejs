@@ -16,7 +16,9 @@ export default function generateChunkNoise(seedId: number, { location, chunkMod,
       chunkSize: worldConfig.chunkSize,
     })
     worker.onmessage = ({ data }: { data: Chunk }) => {
-      resolve(data)
+      if (data.done) {
+        resolve(JSON.parse(data.data))
+      }
     }
   })
 }

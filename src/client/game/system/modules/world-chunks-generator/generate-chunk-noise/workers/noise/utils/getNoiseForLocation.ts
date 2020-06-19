@@ -29,10 +29,10 @@ export default function isCubeFilled(noise, noiseChunks, x, y, z, mod = 100): bo
   //   console.log(noiseValue)
   //   m--
   // }
-  // noiseValue += -y // ( 5 / z ) / 10
-  // noiseValue -= z
+  // noiseValue += -z / 2 // ( 5 / z ) / 10
   // noiseValue = Math.pow(noiseValue, 5.0)
   // cache[`${x}_${y}_${z}`] = { noiseValue }
+  noiseValue = Math.round(noiseValue * 2) / 2
   return noiseValue
   // return noiseValue;
   // noiseValue = ( noiseValue / 2 ) / y;

@@ -1,3 +1,5 @@
+import { BufferGeometry, BoxHelper } from 'THREE'
+
 type Location2D = {
   x: number
   y: number
@@ -39,4 +41,9 @@ export interface ChunkNoiseOpts {
   location: Location2D
   chunkMod: number
   chunkId: string
+}
+
+export interface ChunkGeometries {
+  geometry: BufferGeometry
+  helperGeometries: BufferGeometry[] | BoxHelper[]
 }

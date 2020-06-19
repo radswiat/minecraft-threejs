@@ -1,22 +1,28 @@
 // @ts-ignore
 import SurroundingsWorker from 'worker-loader!./workers/surroundings/surroundings.worker'
+import gameLoaderStore from '@shared/stores/gameLoader'
 
 import { OptimizeChunkSurroundingsOpts } from './optimize-chunk-surroundings.types'
 
-import { Chunk, ChunkCoordinated } from '../world-chunks-generator.types'
+import { ChunkCoordinated } from '../world-chunks-generator.types'
 
 export default function optimizeChunkSurroundings(
   chunks: ChunkCoordinated,
-  { noiseRenderThreshold }: OptimizeChunkSurroundingsOpts,
+  { noiseRenderThreshold, thresholdMod }: OptimizeChunkSurroundingsOpts,
 ): Promise<ChunkCoordinated> {
   return new Promise((resolve) => {
     const worker = new SurroundingsWorker()
     worker.postMessage({
-      chunks,
+      chunks: JSON.stringify(chunks),
       noiseRenderThreshold,
+      thresholdMod,
     })
     worker.onmessage = ({ data }: { data: ChunkCoordinated }) => {
-      resolve(data)
+      if (data.done) {
+        resolve(JSON.parse(data.data))
+      } else {
+        gameLoaderStore.increment()
+      }
     }
   })
 }

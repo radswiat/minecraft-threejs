@@ -36,39 +36,39 @@ export default new (class DatGUI {
   ]
 
   constructor() {
-    const gui = new Dat.GUI()
-
-    // generate default DAT values
-    const Text = function (controlsGroups) {
-      for (const [groupName, groupTag, items] of controlsGroups) {
-        for (const [type, name, value] of items) {
-          this[name] = value
-        }
-      }
-    }
-
-    // create default values
-    const text = new Text(this.controlsGroups)
-
-    // build dat GUI
-    for (const [groupName, groupTag, items] of this.controlsGroups) {
-      const guiGroup = gui.addFolder(groupName)
-      for (const [type, name, value, min, max] of items) {
-        guiGroup[type](text, name, min, max).onChange((v) => this.handleChange(`${groupTag}:${name}`, v))
-      }
-    }
+    // const gui = new Dat.GUI()
+    //
+    // // generate default DAT values
+    // const Text = function (controlsGroups) {
+    //   for (const [groupName, groupTag, items] of controlsGroups) {
+    //     for (const [type, name, value] of items) {
+    //       this[name] = value
+    //     }
+    //   }
+    // }
+    //
+    // // create default values
+    // const text = new Text(this.controlsGroups)
+    //
+    // // build dat GUI
+    // for (const [groupName, groupTag, items] of this.controlsGroups) {
+    //   const guiGroup = gui.addFolder(groupName)
+    //   for (const [type, name, value, min, max] of items) {
+    //     guiGroup[type](text, name, min, max).onChange((v) => this.handleChange(`${groupTag}:${name}`, v))
+    //   }
+    // }
   }
 
   onChange(type, cb) {
-    if (!isDefined(this.events[type])) {
-      this.events[type] = []
-    }
-    this.events[type].push(cb)
+    // if (!isDefined(this.events[type])) {
+    //   this.events[type] = []
+    // }
+    // this.events[type].push(cb)
   }
 
   handleChange(type, value) {
-    if (isDefined(this.events[type])) {
-      this.events[type].map((cb) => cb(value))
-    }
+    // if (isDefined(this.events[type])) {
+    //   this.events[type].map((cb) => cb(value))
+    // }
   }
 })()

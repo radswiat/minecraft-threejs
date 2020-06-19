@@ -197,10 +197,13 @@ ctx.addEventListener(
     // let noiseValue = data.noise.perlin3(data.x, data.y, data.z);
     // console.log('noise: ======================')
     ctx.postMessage({
-      chunkId,
-      noiseMax: max,
-      noiseMin: min,
-      data: Object.values(noiseChunks),
+      done: true,
+      data: JSON.stringify({
+        chunkId,
+        noiseMax: max,
+        noiseMin: min,
+        data: Object.values(noiseChunks),
+      }),
     })
     Perf.get(`⚙ noise worker: ${chunkId}`).end()
   },
