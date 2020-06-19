@@ -1,0 +1,31 @@
+.wrapper {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background-image: url('../../../../../assets/web/dark-dirt.png');
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--visible {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  &--hidden {
+    display: none;
+  }
+
+  &__foreground {
+
+  }
+
+  &__container {
+    width: 60%;
+    height: 10%;
+    //background: rgba(160, 161, 158, 0.8);
+    //border: 1px solid #bfbfbf;
+  }
+}

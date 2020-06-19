@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./=build/",
+    "jsx": "preserve",
+    "target": "ESNext",
+    "declaration": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports":true,
+    "paths": {
+      "@web/*":["src/client/web/*"],
+      "@game/*":["src/client/game/*"],
+      "@shared/*":["src/client/shared/*"],
+      "@libraries/*":["src/libraries/*"]
+    },
+    "lib": ["webworker", "es6", "dom", "scripthost"],
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "esModuleInterop": true
+  }
+}
