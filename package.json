@@ -8,7 +8,7 @@
   "scripts": {
     "eslint": "eslint ./src/**/*.js",
     "start": " cross-env NEUTRINO_CONFIG=client webpack-dev-server --mode development --env=int1",
-    "build": "babel-node build-tools/npm-scripts/webpack-live.js"
+    "build": "webpack --mode production"
   },
   "dependencies": {
     "@types/dat.gui": "^0.7.5",

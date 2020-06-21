@@ -11,7 +11,7 @@ export default (): unknown => ({
   options: {
     root: process.cwd(),
     source: path.resolve(process.cwd(), 'src/client'),
-    output: path.resolve(process.cwd(), '=build/client'),
+    output: path.resolve(process.cwd(), 'build'),
   },
   use: [
     react({ indexHtml: path.resolve(process.cwd(), 'src/client/index.html') }),
