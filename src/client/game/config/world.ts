@@ -5,8 +5,8 @@ export const worldConfig = {
   cubeSize: 20,
   // Number of chunks
   // Min: 9
-  // Pattern. 9, 25, 49, 81, 121, 169
-  chunks: 169,
+  // Pattern. 9, 25, 49, 81, 121, 169, 225, 289, 361, 441
+  chunks: 25,
   // size of each chunks
   chunkSize: 25, // 26
   // how many chunks to generate at once

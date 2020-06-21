@@ -20,13 +20,17 @@ ctx.addEventListener(
     const chunks = JSON.parse(data.chunks) as ChunkCoordinated
     const noiseRenderThreshold = data.noiseRenderThreshold as number
     const thresholdMod = data.thresholdMod
+    const waterLevel = -12
 
     // convert to 3D
     // we need to find particular blocks by x,y,z coords so we need to convert them into [x,y,z] notation
     const blocks: ChunkDataCoordinated = {}
     Object.entries(chunks).forEach(([key, value]) => {
       value.data.forEach((chunk) => {
-        if (isAboveThreshold(chunk.noiseValue, noiseRenderThreshold, thresholdMod, chunk.absLocation.z)) {
+        if (
+          chunk.location.z === waterLevel ||
+          isAboveThreshold(chunk.noiseValue, noiseRenderThreshold, thresholdMod, chunk.absLocation.z)
+        ) {
           blocks[`${chunk.location.x}:${chunk.location.y}:${chunk.location.z}`] = chunk
         }
       })
@@ -35,7 +39,10 @@ ctx.addEventListener(
     Object.entries(chunks).forEach(([key, value]) => {
       const chunk = chunks[key]
       chunk.data = chunk.data.filter((chunkData: ChunkData) => {
-        return isAboveThreshold(chunkData.noiseValue, noiseRenderThreshold, thresholdMod, chunkData.absLocation.z)
+        return (
+          chunkData.location.z === waterLevel ||
+          isAboveThreshold(chunkData.noiseValue, noiseRenderThreshold, thresholdMod, chunkData.absLocation.z)
+        )
       })
       chunk.data = chunk.data.map((data) => {
         const { x, y, z } = data.location
@@ -48,6 +55,18 @@ ctx.addEventListener(
           ny: !!getChunkFromLocation(blocks, x, y - 1, z),
         }
         return data
+      })
+      // filter ones that has no sides!
+      // increases the performance
+      chunk.data = chunk.data.filter((data) => {
+        return !(
+          data.surrounding.px &&
+          data.surrounding.nx &&
+          data.surrounding.py &&
+          data.surrounding.pz &&
+          data.surrounding.nz &&
+          data.surrounding.ny
+        )
       })
       ctx.postMessage({ done: false })
     })

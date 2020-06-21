@@ -16,16 +16,21 @@ export default function createOptimizedCubeGeometry(chunk: Chunk, cubePlanes: Cu
   const matrix = new Matrix4()
   const tmpGeometry = new Geometry()
   // For each cube data
-  chunk.data.forEach((cube) => {
-    // Apply cube location to the matrix
-    matrix.makeTranslation(cube.location.x * cubeSize, cube.location.y * cubeSize, cube.location.z * cubeSize)
-    // Check what cube geometry should be drawn
-    if (!cube.surrounding.px) tmpGeometry.merge(cubePlanes.px, matrix, cube.material)
-    if (!cube.surrounding.nx) tmpGeometry.merge(cubePlanes.nx, matrix, cube.material)
-    if (!cube.surrounding.py) tmpGeometry.merge(cubePlanes.py, matrix, cube.material)
-    if (!cube.surrounding.pz) tmpGeometry.merge(cubePlanes.pz, matrix, cube.material)
-    if (!cube.surrounding.nz) tmpGeometry.merge(cubePlanes.nz, matrix, cube.material)
-    if (!cube.surrounding.ny) tmpGeometry.merge(cubePlanes.ny, matrix, cube.material)
+  chunk.data.forEach((chunk) => {
+    if (chunk.location.z === -12) chunk.material = 5
+    if (chunk.location.z === -11) chunk.material = 6
+    if (chunk.location.z === -10) chunk.material = 6
+    // if (chunk.location.z === -9) chunk.material = 6
+    // Apply chunk location to the matrix
+    matrix.makeTranslation(chunk.location.x * cubeSize, chunk.location.y * cubeSize, chunk.location.z * cubeSize)
+    // Check what chunk geometry should be drawn
+    if (!chunk.surrounding.px) tmpGeometry.merge(cubePlanes.px, matrix, chunk.material)
+    if (!chunk.surrounding.nx) tmpGeometry.merge(cubePlanes.nx, matrix, chunk.material)
+    if (!chunk.surrounding.py) tmpGeometry.merge(cubePlanes.py, matrix, chunk.material)
+    if (!chunk.surrounding.pz) tmpGeometry.merge(cubePlanes.pz, matrix, chunk.material)
+    if (!chunk.surrounding.nz) tmpGeometry.merge(cubePlanes.nz, matrix, chunk.material)
+    if (!chunk.surrounding.ny) tmpGeometry.merge(cubePlanes.ny, matrix, chunk.material)
   })
+
   return new BufferGeometry().fromGeometry(tmpGeometry)
 }

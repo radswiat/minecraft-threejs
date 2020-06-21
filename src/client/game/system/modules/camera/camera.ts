@@ -5,9 +5,10 @@ import renderer from '@game/system/engine/renderer'
 import { toRad } from '@game/utils/_to-rad'
 
 import '@libraries/trackball'
-import '@libraries/pointer-lock-controls'
+import { PointerLockControls } from '@libraries/pointer-lock-controls'
 import '@libraries/first-person-controls'
-import * as THREE from 'three'
+import gameEvents from '@game/system/modules/game-events'
+import controlsMove from './controls'
 
 const defaults = {
   rotation: {
@@ -16,9 +17,9 @@ const defaults = {
     z: 0,
   },
   position: {
-    x: -857,
-    y: 1911,
-    z: 848,
+    x: -1100.2243563049192,
+    y: 196.94912220775572,
+    z: -165,
   },
 }
 
@@ -45,6 +46,18 @@ export default class Plane {
   }
 
   createControls() {
+    // TODO: new controls
+    // const controls = new PointerLockControls(this.camera, document.body)
+    // this.controls = controls
+    // controlsMove(controls)
+    // document.getElementsByTagName('body')[0].addEventListener(
+    //   'click',
+    //   function () {
+    //     controls.lock()
+    //   },
+    //   false,
+    // )
+
     this.controls = new FirstPersonControls(this.camera)
     this.controls.movementSpeed = 320
     this.controls.lookSpeed = 0.18
@@ -53,6 +66,7 @@ export default class Plane {
     this.controls.lon = -115
     this.controls.lat = -30
     this.controls.enabled = true
+    gameEvents.addArgs('render', [{ controls: this.controls }])
   }
 
   setDefaults() {

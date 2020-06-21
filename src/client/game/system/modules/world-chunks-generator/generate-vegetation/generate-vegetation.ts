@@ -1,24 +1,17 @@
 // @ts-ignore
-import NormalizeWorker from 'worker-loader!./workers/normalize/normalize.worker'
+import VegetationWorker from 'worker-loader!./workers/vegetation/vegetation.worker'
 import gameLoaderStore from '@shared/stores/gameLoader'
 
 import { ChunkCoordinated } from '../world-chunks-generator.types'
 
-let cachedMaxNoise = null
-let cachedMinNoise = null
-
-export default function normalizeChunkNoise(chunks: ChunkCoordinated): Promise<ChunkCoordinated> {
+export default function generateVegetation(chunks: ChunkCoordinated): Promise<ChunkCoordinated> {
   return new Promise((resolve) => {
-    const worker = new NormalizeWorker()
+    const worker = new VegetationWorker()
     worker.postMessage({
       chunks: JSON.stringify(chunks),
-      maxNoise: cachedMaxNoise,
-      minNoise: cachedMinNoise,
     })
     worker.onmessage = ({ data }: { data: ChunkCoordinated }) => {
       if (data.done) {
-        cachedMaxNoise = data.maxNoise
-        cachedMinNoise = data.minNoise
         resolve(JSON.parse(data.data))
       } else {
         gameLoaderStore.increment()

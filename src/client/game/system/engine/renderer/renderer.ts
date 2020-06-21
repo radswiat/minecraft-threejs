@@ -1,5 +1,7 @@
 import { PCFSoftShadowMap, WebGLRenderer, Raycaster } from 'three'
 
+import gameEvents from '@game/system/modules/game-events'
+
 export default new (class Renderer {
   updateStack = []
 
@@ -18,6 +20,7 @@ export default new (class Renderer {
 
   render = (scene, camera) => {
     this.updateStack.map((cb) => {
+      gameEvents.trigger('render')
       cb()
     })
     this.renderer.render(scene, camera)

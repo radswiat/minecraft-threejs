@@ -1,4 +1,3 @@
-import toRange from '@game/utils/toRange'
 import { Perf } from '@game/utils'
 import NormalizeSubWorker from 'worker-loader!./normalize.sub.worker'
 import { ChunkCoordinated } from '@game/system/modules/world-chunks-generator/world-chunks-generator.types'
@@ -6,15 +5,14 @@ import PromiseQueue from 'p-queue'
 
 const ctx: Worker = self as any
 
-let mmsg = 10
 ctx.addEventListener(
   'message',
   async ({ data }) => {
     Perf.get(`⚙ normalize worker`)
 
     const chunks = JSON.parse(data.chunks)
-    const maxNoise = Math.max(...Object.values(chunks).map((chunk) => chunk.noiseMax))
-    const minNoise = Math.min(...Object.values(chunks).map((chunk) => chunk.noiseMin))
+    const maxNoise = data.maxNoise || Math.max(...Object.values(chunks).map((chunk) => chunk.noiseMax))
+    const minNoise = data.minNoise || Math.min(...Object.values(chunks).map((chunk) => chunk.noiseMin))
 
     const queue = new PromiseQueue({ concurrency: 12 })
     const defer = []
@@ -41,7 +39,7 @@ ctx.addEventListener(
 
     await Promise.all(defer)
 
-    ctx.postMessage({ done: true, data: JSON.stringify(chunks) })
+    ctx.postMessage({ done: true, data: JSON.stringify(chunks), maxNoise, minNoise })
     Perf.get(`⚙ normalize worker`).end()
   },
   false,

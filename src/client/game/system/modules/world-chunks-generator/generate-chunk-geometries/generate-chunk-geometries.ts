@@ -14,8 +14,6 @@ import { Chunk, ChunkGeometries } from '../world-chunks-generator.types'
  */
 export default async function generateChunkGeometries(chunk: Chunk, { location }): Promise<ChunkGeometries> {
   return new Promise(async (resolve) => {
-    const cubeSize = worldConfig.cubeSize
-
     // Create cube planes
     // all sides of the cube as separate plane geometries
     const cubePlanes = createCubePlanes()
@@ -27,7 +25,8 @@ export default async function generateChunkGeometries(chunk: Chunk, { location }
 
     resolve({
       geometry,
-      helperGeometries: [createChunkBoxHelper(location, cubeSize)],
+      helperGeometries: [],
+      // helperGeometries: [createChunkBoxHelper(location)],
     })
   })
 }
