@@ -6,3 +6,5 @@ src/seemore.html
 src/seemore/
 *.log.*
 *.log
+dist
+
