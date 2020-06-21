@@ -13,33 +13,41 @@ import generateChunkNoise from './generate-chunk-noise'
 import normalizeChunkNoise from './normalize-chunk-noise'
 import optimizeChunkSurroundings from './optimize-chunk-surroundings'
 import generateVegetation from './generate-vegetation'
+import memory from './world-chunks-generator.memory'
 
-import { ChunkCoordinated } from './world-chunks-generator.types'
+import { ChunkCoordinated, WorldChunksGeneratorOpts } from './world-chunks-generator.types'
 
 const chunkCache = {}
 
 /**
  * Generate chunks
  * @param seedId
+ * @param opts
+ * @param opts.startChunkLocation
  */
-export default async function worldChunksGenerator(seedId: number, startingChunk: [number, number] = [0, 0]): Promise<WorldChunk[]> {
+export default async function worldChunksGenerator(
+  seedId: number,
+  { startChunkLocation = [0, 0] }: WorldChunksGeneratorOpts,
+): Promise<WorldChunk[]> {
   // Chunk promises
   const chunksDefer: WorldChunk[] = []
 
   // list of all chunks
   let chunks: ChunkCoordinated = {}
 
+  // Get chunk drawing range
+  // see: Centered octagonal number
   const range = Math.floor(Math.sqrt(worldConfig.chunks) / 2)
-  const rangeArrX: [number, number] = [startingChunk[0] - range, startingChunk[0] + range]
-  const rangeArrY: [number, number] = [startingChunk[1] - range, startingChunk[1] + range]
-  const rangeArr = [rangeArrX, rangeArrY]
+  const rangeArr: [number[], number[]] = [
+    [startChunkLocation[0] - range, startChunkLocation[0] + range],
+    [startChunkLocation[1] - range, startChunkLocation[1] + range],
+  ]
 
   // generate-chunk-noise
-  // uses: @web-worker
   Perf.get(`🧩 chunks noise`)
   gameLoaderStore.setNewTask('Generate chunks noise', { max: worldConfig.chunks })
   await forEachRange(rangeArr, async (x: number, y: number) => {
-    if (chunkCache[`${x}${y}`]) return
+    if (memory.chunksCache[`${x}${y}`]) return
     chunks[`${x}${y}`] = await generateChunkNoise(seedId, {
       chunkId: `${x}:${y}`,
       location: { x, y },
@@ -91,8 +99,8 @@ export default async function worldChunksGenerator(seedId: number, startingChunk
   Perf.get(`🌍 geometries`)
   gameLoaderStore.setNewTask('Render geometries', { max: worldConfig.chunks })
   await forEachRange(rangeArr, async (x: number, y: number) => {
-    if (chunkCache[`${x}${y}`]) return
-    chunkCache[`${x}${y}`] = true
+    if (memory.chunksCache[`${x}${y}`]) return
+    memory.chunksCache[`${x}${y}`] = true
     chunksDefer.push(
       await generateChunkGeometries(chunks[`${x}${y}`], {
         location: { x, y },

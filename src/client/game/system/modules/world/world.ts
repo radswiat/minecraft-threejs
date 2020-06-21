@@ -73,7 +73,7 @@ export default class World {
    */
   async generateWorld() {
     Perf.get('Generate world chunks')
-    this.worldChunks = await worldChunksGenerator(1, this.currentChunk)
+    this.worldChunks = await worldChunksGenerator(1, { startChunkLocation: this.currentChunk })
     Perf.get('Generate world chunks').end()
   }
 
