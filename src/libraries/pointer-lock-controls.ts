@@ -1,4 +1,4 @@
-import { Euler, EventDispatcher, Vector3 } from 'THREE'
+import { Euler, EventDispatcher, Vector3 } from 'three'
 
 var PointerLockControls = function (camera, domElement) {
   if (domElement === undefined) {

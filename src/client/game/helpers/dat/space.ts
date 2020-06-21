@@ -1,6 +1,6 @@
 import { Math as ThreeMath } from 'three'
 import { GUI } from 'dat.gui'
-import { Color } from 'THREE'
+import { Color } from 'three'
 
 import get from 'lodash/get'
 import set from 'lodash/set'

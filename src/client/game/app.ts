@@ -1,4 +1,4 @@
-import { AxesHelper, DirectionalLight, Scene } from 'THREE'
+import { AxesHelper, DirectionalLight, Scene } from 'three'
 
 import renderer from '@game/system/engine/renderer'
 import dat from '@game/helpers/dat-gui'

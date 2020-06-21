@@ -1,4 +1,4 @@
-import { BufferGeometry, BoxHelper } from 'THREE'
+import { BufferGeometry, BoxHelper } from 'three'
 
 type Location2D = {
   x: number

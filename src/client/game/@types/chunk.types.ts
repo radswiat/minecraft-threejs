@@ -1,4 +1,4 @@
-import { BufferGeometry, Material, BoxHelper } from 'THREE'
+import { BufferGeometry, Material, BoxHelper } from 'three'
 
 export interface WorldChunk {
   geometry: BufferGeometry

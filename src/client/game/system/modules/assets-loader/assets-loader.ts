@@ -1,4 +1,4 @@
-import { TextureLoader } from 'THREE'
+import { TextureLoader } from 'three'
 import flatten from 'lodash/flatten'
 
 import { assetsConfig } from '@game/config'

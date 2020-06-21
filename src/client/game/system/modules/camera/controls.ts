@@ -1,4 +1,4 @@
-import { Raycaster, Vector3 } from 'THREE'
+import { Raycaster, Vector3 } from 'three'
 
 var velocity = new Vector3()
 var direction = new Vector3()
