@@ -2,25 +2,26 @@
 import { Noise } from 'noisejs'
 import { Perf } from '@game/utils'
 
-import getNoiseForLocation from './utils/getNoiseForLocation'
-import { ChunkData2D, ChunkDataArr } from '../../../world-chunks-generator.types'
+import getCubeNoise from './utils/get-cube-noise'
+import getTreeNoise from './utils/get-tree-noise'
+
+import { ChunkData2D, ChunkDataArr } from '../world-chunks-generator.types'
 
 const ctx: Worker = self as any
 
 ctx.addEventListener(
   'message',
   ({ data }) => {
-    const seedId = data.seed
+    const seedId = data.seedId
     const chunkId = data.chunkId
     const chunkSize = data.chunkSize
     const noise = new Noise(seedId)
+    const chunkDataLocation = data.chunkLocation
 
     let chunkDataNoiseArr: ChunkDataArr = []
     let chunkDataNoise2D: ChunkData2D = {}
 
-    const chunkDataLocation = data.chunkLocation
-
-    Perf.get(`⚙ noise worker: ${chunkId}`)
+    Perf.get(`   ⚙ noise worker: ${chunkId}`)
 
     for (let x = Math.floor(chunkSize / 2) * -1; x < Math.ceil(chunkSize / 2); x++) {
       for (let y = Math.floor(chunkSize / 2) * -1; y < Math.ceil(chunkSize / 2); y++) {
@@ -30,8 +31,6 @@ ctx.addEventListener(
 
           tx += 14
           ty += 14
-          // main noise value
-          let noiseValue = getNoiseForLocation(noise, tx, ty, z)
 
           chunkDataNoiseArr.push({
             chunkDataId: `${tx}_${ty}_${tz}`,
@@ -45,32 +44,44 @@ ctx.addEventListener(
               y,
               z,
             },
-            noiseValue,
+            noiseValue: getCubeNoise(noise, tx, ty, z),
+            vegetation: {
+              treeNoise: getTreeNoise(noise, tx, ty, z),
+            },
           })
         }
       }
     }
 
-    // normalize noise to fit range 0-1
-    const max = Math.max(...chunkDataNoiseArr.map(({ noiseValue }) => noiseValue))
-    const min = Math.min(...chunkDataNoiseArr.map(({ noiseValue }) => noiseValue))
+    // normalize noises to fit range 0-1
+    const cubeNoiseMap = chunkDataNoiseArr.map(({ noiseValue }) => noiseValue)
+    const treeNoiseMap = chunkDataNoiseArr.map((chunkData) => chunkData.vegetation.treeNoise)
+    const cubeMax = Math.max(...cubeNoiseMap)
+    const cubeMin = Math.min(...cubeNoiseMap)
+    const treeMax = Math.max(...treeNoiseMap)
+    const treeMin = Math.min(...treeNoiseMap)
 
     chunkDataNoiseArr.forEach((chunkData) => {
       chunkDataNoise2D[chunkData.chunkDataId] = chunkData
     })
 
-    // let noiseValue = data.noise.perlin3(data.x, data.y, data.z);
-    // console.log('noise: ======================')
+    Perf.get(`   ⚙ noise worker: ${chunkId}`).end()
+
+    Perf.get(`   ⚙ postMessage worker`)
     ctx.postMessage({
       done: true,
       data: JSON.stringify({
         chunkId,
-        noiseMax: max,
-        noiseMin: min,
-        data: Object.values(chunkDataNoise2D),
+        noiseMaps: {
+          treeMax: treeMax,
+          treeMin: treeMin,
+          cubeMax,
+          cubeMin,
+        },
+        data: Object.values(chunkDataNoiseArr),
       }),
     })
-    Perf.get(`⚙ noise worker: ${chunkId}`).end()
+    Perf.get(`   ⚙ postMessage worker`).end()
   },
   false,
 )

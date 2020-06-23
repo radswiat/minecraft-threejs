@@ -1,3 +1,6 @@
+// @ts-ignore
+import { Noise } from 'noisejs'
+
 /**
  * Get noise for location
  * - using cache
@@ -6,9 +9,8 @@
  * @param x
  * @param y
  * @param z
- * @param mod
  */
-export default function getNoiseForLocation(noise, { x, y, z }): number {
+export default function getNoiseForLocation(noise: Noise, x: number, y: number, z: number): number {
   const frequency = 500
   const mod = 5
 

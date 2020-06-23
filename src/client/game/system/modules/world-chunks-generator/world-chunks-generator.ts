@@ -8,16 +8,16 @@ import NoiseHelper from '@game/system/modules/noise-helper'
 import gameEvents from '@game/system/modules/game-events'
 
 import forEachRange from './utils/forEachRange'
+import useWorker from './utils/useWorker'
+
+import NoiseWorker from './generate-chunk-noise'
+import DataWorker from './generate-chunk-data'
+
 import generateChunkGeometries from './generate-chunk-geometries'
-import generateChunkNoise from './generate-chunk-noise'
-import normalizeChunkNoise from './normalize-chunk-noise'
-import optimizeChunkSurroundings from './optimize-chunk-surroundings'
 import generateVegetation from './generate-vegetation'
 import memory from './world-chunks-generator.memory'
 
-import { ChunkCoordinated, WorldChunksGeneratorOpts } from './world-chunks-generator.types'
-
-const chunkCache = {}
+import { Chunks2D, Chunk, WorldChunksGeneratorOpts } from './world-chunks-generator.types'
 
 /**
  * Generate chunks
@@ -33,7 +33,7 @@ export default async function worldChunksGenerator(
   const chunksDefer: WorldChunk[] = []
 
   // list of all chunks
-  let chunks: ChunkCoordinated = {}
+  let chunks: Chunks2D = {}
 
   // Get chunk drawing range
   // see: Centered octagonal number
@@ -48,10 +48,15 @@ export default async function worldChunksGenerator(
   gameLoaderStore.setNewTask('Generate chunks noise', { max: worldConfig.chunks })
   await forEachRange(rangeArr, async (x: number, y: number) => {
     if (memory.chunksCache[`${x}${y}`]) return
-    chunks[`${x}${y}`] = await generateChunkNoise(seedId, {
+    chunks[`${x}${y}`] = await useWorker<Chunk>(NoiseWorker, {
+      seedId,
       chunkId: `${x}:${y}`,
-      location: { x, y },
-      chunkMod: worldConfig.chunkMod,
+      chunkLocation: { x, y },
+      chunkSize: worldConfig.chunkSize,
+      normalize: {
+        max: null,
+        min: null,
+      },
     })
     gameLoaderStore.increment()
   })
@@ -60,21 +65,22 @@ export default async function worldChunksGenerator(
 
   // normalize chunk noise
   // uses: @web-worker
-  Perf.get(`🧩 normalize noise`)
-  gameLoaderStore.setNewTask('Normalize chunk noise', { max: worldConfig.chunks })
-  chunks = await normalizeChunkNoise(chunks)
+  Perf.get(`🧩 chunk data`)
+  gameLoaderStore.setNewTask('Chunk data', { max: worldConfig.chunks })
+  chunks = await useWorker<Chunks2D>(
+    DataWorker,
+    {
+      chunks: JSON.stringify(chunks),
+      noiseRenderThreshold: 0.65,
+      noiseRenderThresholdMod: 20,
+      waterLevel: -12,
+      // maxNoise: cachedMaxNoise,
+      // minNoise: cachedMinNoise,
+    },
+    () => gameLoaderStore.increment(),
+  )
   gameLoaderStore.setTaskFinished()
-  Perf.get(`🧩 normalize noise`).end()
-
-  // optimize surroundings
-  Perf.get(`🏎 optimize surroundings`)
-  gameLoaderStore.setNewTask('Optimize chunk surroundings', { max: worldConfig.chunks })
-  chunks = await optimizeChunkSurroundings(chunks, {
-    noiseRenderThreshold: 0.65,
-    thresholdMod: 20,
-  })
-  gameLoaderStore.setTaskFinished()
-  Perf.get(`🏎 optimize surroundings`).end()
+  Perf.get(`🧩 chunk data`).end()
 
   // render noise helper
   // Perf.get(`⚙ noiseHelper`)
@@ -89,11 +95,11 @@ export default async function worldChunksGenerator(
   // gameLoaderStore.setTaskFinished()
   // Perf.get(`⚙ noiseHelper`).end()
 
-  Perf.get(`🌍 vegetation`)
-  gameLoaderStore.setNewTask('Generate vegetation', { max: worldConfig.chunks })
-  chunks = await generateVegetation(chunks)
-  gameLoaderStore.setTaskFinished()
-  Perf.get(`🌍 vegetation`).end()
+  // Perf.get(`🌍 vegetation`)
+  // gameLoaderStore.setNewTask('Generate vegetation', { max: worldConfig.chunks })
+  // chunks = await generateVegetation(chunks)
+  // gameLoaderStore.setTaskFinished()
+  // Perf.get(`🌍 vegetation`).end()
 
   // render geometries
   Perf.get(`🌍 geometries`)

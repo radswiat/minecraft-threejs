@@ -15,13 +15,6 @@ type Location = {
   z: number
 }
 
-export interface Chunk {
-  chunkId: string
-  noiseMax: number
-  noiseMin: number
-  data: ChunkData[]
-}
-
 export type ChunkCoordinated = { [key: string]: Chunk }
 
 export type ChunkDataCoordinated = { [key: string]: ChunkData }
@@ -38,22 +31,43 @@ export interface ChunkGeometries {
 }
 
 // -------------- FIXED
+export interface Chunk {
+  chunkId: string
+  noiseMaps: {
+    treeMax: number
+    treeMin: number
+    cubeMax: number
+    cubeMin: number
+  }
+  data: ChunkData[]
+}
 
 export interface ChunkData {
   chunkDataId: string
+  noiseValue: number
   location: Location
   absLocation: Location
+  vegetation: Vegetation
   material?: number
-  noiseValue: number
-  surrounding?: {
-    nx: boolean
-    ny: boolean
-    nz: boolean
-    px: boolean
-    py: boolean
-    pz: boolean
-  }
+  surrounding?: Surroundings
+  isTransparent?: boolean
 }
 
+export interface Surroundings {
+  nx: boolean
+  ny: boolean
+  nz: boolean
+  px: boolean
+  py: boolean
+  pz: boolean
+}
+
+export interface Vegetation {
+  treeNoise: number
+}
+
+export type Chunks2D = { [key: string]: Chunk }
+export type ChunksArr = Chunk[]
 export type ChunkData2D = { [key: string]: ChunkData }
 export type ChunkDataArr = ChunkData[]
+export type Cubes3D = { [key: string]: ChunkData }

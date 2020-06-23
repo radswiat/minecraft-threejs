@@ -1,1 +1,2 @@
-export { default } from './generate-chunk-noise'
+// @ts-ignore
+export { default } from 'worker-loader!./generate-chunk-noise.worker'
