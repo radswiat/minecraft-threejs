@@ -2,16 +2,13 @@
 
 <img src="http://minecraft.radswiat.co.uk/static/screenshot.jpg" width="700px">
 
-### Minecraft concept in theejs
-### Cube seeded world generator
+# About
+
+Javascript implementation of minecraft with dynamic world based on a SEED.
 
 ## Features
 - seeded world
 - terrain generator
-- lighting
-- sky
-- trees
-- high terrain detection
-
+- chunks
 
 
