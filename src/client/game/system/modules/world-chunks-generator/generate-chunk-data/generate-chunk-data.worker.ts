@@ -17,10 +17,10 @@ ctx.addEventListener(
   async ({ data }) => {
     const chunks2D: Chunks2D = JSON.parse(data.chunks)
     const cubes3D: Cubes3D = {}
-    const cubeNoiseMax = data.maxNoise || Math.max(...Object.values(chunks2D).map((chunk: Chunk) => chunk.noiseMaps.cubeMax))
-    const cubeNoiseMin = data.minNoise || Math.min(...Object.values(chunks2D).map((chunk: Chunk) => chunk.noiseMaps.cubeMin))
-    const treeNoiseMax = data.maxNoise || Math.max(...Object.values(chunks2D).map((chunk: Chunk) => chunk.noiseMaps.treeMax))
-    const treeNoiseMin = data.minNoise || Math.min(...Object.values(chunks2D).map((chunk: Chunk) => chunk.noiseMaps.treeMin))
+    const cubeNoiseMax = Math.max(...Object.values(chunks2D).map((chunk: Chunk) => chunk.noiseMaps.cubeMax)) || data?.noiseMaps?.cubeMax
+    const cubeNoiseMin = Math.min(...Object.values(chunks2D).map((chunk: Chunk) => chunk.noiseMaps.cubeMin)) || data?.noiseMaps?.cubeMin
+    const treeNoiseMax = data?.noiseMaps?.treeMax || Math.max(...Object.values(chunks2D).map((chunk: Chunk) => chunk.noiseMaps.treeMax))
+    const treeNoiseMin = data?.noiseMaps?.treeMin || Math.min(...Object.values(chunks2D).map((chunk: Chunk) => chunk.noiseMaps.treeMin))
     const noiseRenderThreshold = data.noiseRenderThreshold
     const noiseRenderThresholdMod = data.noiseRenderThresholdMod
     const waterLevel = data.waterLevel
@@ -87,7 +87,7 @@ ctx.addEventListener(
     chunksArr.forEach((chunk: Chunk) => {
       chunk.data = chunk.data.map((data: ChunkData) => {
         data.vegetation.treeNoise = toRange(data.vegetation.treeNoise, treeNoiseMax, treeNoiseMin, 1, 0)
-        if (data.vegetation.treeNoise < 0.25 && data.absLocation.z >= -10) {
+        if (data.vegetation.treeNoise < 0.23 && data.absLocation.z >= -10) {
           const treeCubes = drawTree(noise, data.vegetation.treeNoise, cubes3D, data.location)
           // add to optimization
           treeCubes.forEach((chunk: ChunkData) => {
@@ -105,7 +105,16 @@ ctx.addEventListener(
     // Finish
     // =======================================================
     Perf.get(`   ⚙ postMessage worker`)
-    ctx.postMessage({ done: true, data: JSON.stringify(chunks2D) })
+    ctx.postMessage({
+      done: true,
+      data: JSON.stringify(chunks2D),
+      noiseMaps: {
+        cubeMax: cubeNoiseMax,
+        cubeMin: cubeNoiseMin,
+        treeMax: treeNoiseMax,
+        treeMin: treeNoiseMin,
+      },
+    })
     Perf.get(`   ⚙ postMessage worker`).end()
   },
   false,

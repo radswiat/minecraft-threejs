@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Noise } from 'noisejs'
 import { worldConfig } from '@game/config'
 import getTreeCube from '@game/system/modules/world-chunks-generator/generate-chunk-data/chunk-vegetation/get-tree-cube'
@@ -20,7 +21,7 @@ export default function drawTree(noise: Noise, noiseValue: number, cubes3D: Cube
 
   // tree needs at least x blocks around space
   let anyCubesAround = false
-  getCubesAround(1, { x: location.x, y: location.y, z: location.z + 1 }, (x, y, z) => {
+  getCubesAround(1, { x: location.x, y: location.y, z: location.z + 1 }, (x: number, y: number, z: number) => {
     if (cubes3D[`${x}:${y}:${z}`]) {
       anyCubesAround = true
     }

@@ -1,5 +1,5 @@
 // @ts-ignore
-import { FirstPersonControls, PerspectiveCamera, Clock, Vector3, Object3D } from 'three'
+import { FirstPersonControls, PerspectiveCamera, Clock, Object3D } from 'three'
 
 import renderer from '@game/system/engine/renderer'
 import { toRad } from '@game/utils/_to-rad'

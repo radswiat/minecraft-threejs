@@ -5,7 +5,7 @@ import { Perf } from '@game/utils'
 import getCubeNoise from './utils/get-cube-noise'
 import getTreeNoise from './utils/get-tree-noise'
 
-import { ChunkData2D, ChunkDataArr } from '../world-chunks-generator.types'
+import { ChunkDataArr } from '../world-chunks-generator.types'
 
 const ctx: Worker = self as any
 
@@ -17,11 +17,9 @@ ctx.addEventListener(
     const chunkSize = data.chunkSize
     const noise = new Noise(seedId)
     const chunkDataLocation = data.chunkLocation
+    Perf.get(`   ⚙ noise worker: ${chunkId}`)
 
     let chunkDataNoiseArr: ChunkDataArr = []
-    let chunkDataNoise2D: ChunkData2D = {}
-
-    Perf.get(`   ⚙ noise worker: ${chunkId}`)
 
     for (let x = Math.floor(chunkSize / 2) * -1; x < Math.ceil(chunkSize / 2); x++) {
       for (let y = Math.floor(chunkSize / 2) * -1; y < Math.ceil(chunkSize / 2); y++) {
@@ -60,10 +58,6 @@ ctx.addEventListener(
     const cubeMin = Math.min(...cubeNoiseMap)
     const treeMax = Math.max(...treeNoiseMap)
     const treeMin = Math.min(...treeNoiseMap)
-
-    chunkDataNoiseArr.forEach((chunkData) => {
-      chunkDataNoise2D[chunkData.chunkDataId] = chunkData
-    })
 
     Perf.get(`   ⚙ noise worker: ${chunkId}`).end()
 

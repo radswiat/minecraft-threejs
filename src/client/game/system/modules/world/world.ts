@@ -1,4 +1,4 @@
-import { Mesh } from 'three'
+import { Mesh, Fog } from 'three'
 
 import App from '@game/app'
 import { Perf } from '@game/utils'
@@ -39,7 +39,6 @@ export default class World {
     this.chunkOptions = chunkOptions
     this.currentChunk = [-3, 0]
     gameEvents.register('render', async ({ controls }) => {
-      return
       const playerPosition = controls.object.position
       const x = Math.floor(playerPosition.x / (worldConfig.chunkSize * worldConfig.cubeSize))
       const y = Math.floor(playerPosition.y / (worldConfig.chunkSize * worldConfig.cubeSize))
@@ -60,8 +59,6 @@ export default class World {
           })
         }
       }
-      // console.log('render event!')
-      // console.log(controls.object.position)
     })
     Perf.get('Generate world init').end()
   }
@@ -95,6 +92,7 @@ export default class World {
     // testMesh(this.app.scene)
     // render skybox
     const skyboxMesh = skybox()
+    this.app.scene.fog = new Fog('#efdec4', 800, 3500)
     this.app.scene.add(skyboxMesh)
     this.meshes.push(skyboxMesh)
 
