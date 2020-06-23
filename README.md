@@ -1,6 +1,6 @@
 # Minecraft - Javascript - ThreeJS
 
-<img src="http://minecraft.radswiat.co.uk/static/screenshot.png?fit=1024%2C767" width="300px" height="245px">
+<img src="http://minecraft.radswiat.co.uk/static/screenshot.png" width="300px" height="245px">
 
 ### Minecraft concept in theejs
 ### Cube seeded world generator
