@@ -17,7 +17,7 @@
     "classnames": "^2.2.6",
     "dat.gui": "^0.7.7",
     "history": "^5.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
     "noisejs": "^2.1.0",
