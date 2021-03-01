@@ -27,7 +27,7 @@
     "react-router": "^5.2.0",
     "react-router-config": "^5.1.1",
     "react-router-dom": "^5.2.0",
-    "three": "^0.117.1",
+    "three": "^0.125.0",
     "worker-loader": "^2.0.0",
     "jquery": "^3.5.1"
   },
