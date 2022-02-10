@@ -71,7 +71,7 @@
     "fork-ts-checker-webpack-plugin": "^5.0.0",
     "jsx-control-statements": "^3.2.8",
     "neutrino": "^9.2.0",
-    "node-sass": "^4.14.1",
+    "node-sass": "^7.0.0",
     "prettier": "^2.0.5",
     "sass-loader": "^8.0.2",
     "styled-bootstrap-grid": "^3.1.0",
